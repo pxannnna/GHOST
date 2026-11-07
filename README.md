@@ -16,7 +16,7 @@
 ## Setup
 
 ```bash
-git clone https://github.com/pxannnna/invisible-signals.git && cd invisible-signals
+git clone https://github.com/pxannnna/GHOST.git && cd GHOST
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 make hub        # event hub on http://127.0.0.1:8000  (check /health)
 git checkout <your branch>
