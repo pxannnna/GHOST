@@ -62,7 +62,7 @@ makes the website react to the gesture.
 
 | Item | Who holds it | Use |
 |---|---|---|
-| Seeed XIAO ESP32C6 ([PiHut](https://thepihut.com/products/seeed-xiao-esp32c6?variant=53972794442113)) | Shangran (from Kameran) | Wi-Fi CSI receiver over USB. If there are two, a send/receive pair avoids the hotspot entirely. |
+| Seeed XIAO ESP32C6 ([PiHut](https://thepihut.com/products/seeed-xiao-esp32c6?variant=53972794442113)) | Shangran (from Kameran) | Wi-Fi CSI receiver over USB. **Try to get a second one** (~£6): a send/receive pair fixes the channel, packet rate and transmitter MAC, which avoids most venue interference (§4.3). |
 | Phone hotspot, 2.4 GHz | Shangran | CSI transmitter. Fixed position, plugged in, sleep off. |
 | DJI Mic Mini | Kameran | Aircraft recordings. Noise cancelling and low-cut **off**. Keep raw files. |
 | Phone barometer app | Shangran | Floor. phyphox can stream to the laptop; CSV export is the fallback. |
@@ -134,10 +134,28 @@ directly, the fallback is an `<iframe>` with `postMessage({floor, mode})`.
 
 ### 4.3 CSI stream → gesture detector (Shangran ↔ Anna)
 Shangran delivers raw CSI frames on the laptop, in a format both agree at H1
-(e.g. a serial reader that yields `{t, rssi, amplitudes[]}` per frame, plus a
-logger that saves them to `data/csi/*.jsonl`). Anna's detector consumes that
-and emits `gesture.detected`. Labelled trials go in `data/gesture/` with a
+(e.g. a serial reader that yields `{t, mac, rssi, amplitudes[]}` per frame,
+plus a logger that saves them to `data/csi/*.jsonl`). Anna's detector consumes
+that and emits `gesture.detected`. Labelled trials go in `data/gesture/` with a
 trial ID on every window, so splits can be done by trial.
+
+**Requirements on the stream (Shangran):**
+- **Filter by transmitter MAC.** Keep only frames from our own transmitter;
+  the venue is full of co-channel Wi-Fi that would otherwise look like motion.
+- **Our own traffic, ≥50 packets/s, measured.** Beacons (~10/s) are too slow
+  for a hand sweep. Drive traffic with pings/UDP from our transmitter and log
+  the real rate in `wifi.features.packet_rate_hz`.
+- **Prefer two XIAO ESP32C6 boards** (`csi_send` → `csi_recv` over ESP-NOW) if
+  a second board is available: we then control channel, rate and MAC. Phone
+  hotspot is the fallback.
+
+**Recommendations for the detector (Anna decides):** amplitude-only first
+(phase calibration is optional, later); subtract an empty-room baseline
+(differential CSI) and re-record it whenever the rig moves; smooth with a
+moving average or Butterworth low-pass; broad, deliberate gestures only.
+Classify **on the laptop**, not on the XIAO: DTW against recorded templates or
+a small scikit-style classifier are both good fits. On-device ML is out of
+scope for 24 h.
 
 ---
 
