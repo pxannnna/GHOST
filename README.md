@@ -12,9 +12,10 @@ a 3D model. The talk's slides change with a hand gesture sensed through Wi-Fi.
 
 | Person | Owns | Branch | Folders |
 |---|---|---|---|
-| Anna | Echolocation, barometer floor, room matching, 3D Nucleus model, night agent | `room`, `building-3d` | `services/acoustics/`, `services/pressure/`, `web/building3d/`, `assets/building/` |
-| Kameran + Elisa | Wi-Fi gestures: XIAO firmware, wiring, CSI stream, gesture detection | `wifi` | `firmware/xiao/`, `services/wifi/` |
-| Shangran | Website (slides + dashboard) and the event hub | `web` | `web/`, `services/hub/`, `shared/`, `services/mock/` |
+| Anna | Echolocation, barometer floor, room matching, 3D Nucleus model, night agent | `room-location` | `services/acoustics/`, `services/pressure/`, `web/building3d/`, `assets/building/` |
+| Kameran + Elisa | Wi-Fi gestures: XIAO firmware, wiring, CSI stream, gesture detection | `wifi-gesture` | `firmware/xiao/`, `services/wifi/` |
+| Shangran | Website (slides + dashboard) and the event hub | `website` | `web/`, `services/hub/`, `shared/`, `services/mock/` |
+| Kameran (optional) | Plane sounds → which part of Edinburgh | `plane-location` | `services/aircraft/` |
 
 ## Setup
 

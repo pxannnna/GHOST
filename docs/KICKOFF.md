@@ -50,10 +50,10 @@ Every slide shows a mode badge: **live**, **replay**, **simulated** or
 
 | Person | Owns | Branch | Folders |
 |---|---|---|---|
-| **Anna** | **Room finding:** echolocation, phone barometer → floor, room matching against the floor plan, the **3D Nucleus model**. Hosts the overnight agent | `room`, `building-3d` | `services/acoustics/`, `services/pressure/`, `web/building3d/`, `assets/building/` |
-| **Kameran** | **Wi-Fi gestures**, jointly with Elisa: XIAO firmware, CSI streaming, gesture detection | `wifi` | `firmware/xiao/`, `services/wifi/` |
-| **Elisa** | **Wi-Fi gestures**, jointly with Kameran: wiring and connecting the boards, data collection, gesture detection | `wifi` | `firmware/xiao/`, `services/wifi/` |
-| **Shangran** | **The website:** slide deck + live dashboard, slide change on gesture, plus the event hub it talks to | `web` | `web/` (except `web/building3d/`), `services/hub/`, `shared/`, `services/mock/` |
+| **Anna** | **Room finding:** echolocation, phone barometer → floor, room matching against the floor plan, the **3D Nucleus model**. Hosts the overnight agent | `room-location` | `services/acoustics/`, `services/pressure/`, `web/building3d/`, `assets/building/` |
+| **Kameran** | **Wi-Fi gestures**, jointly with Elisa: XIAO firmware, CSI streaming, gesture detection | `wifi-gesture` | `firmware/xiao/`, `services/wifi/` |
+| **Elisa** | **Wi-Fi gestures**, jointly with Kameran: wiring and connecting the boards, data collection, gesture detection | `wifi-gesture` | `firmware/xiao/`, `services/wifi/` |
+| **Shangran** | **The website:** slide deck + live dashboard, slide change on gesture, plus the event hub it talks to | `website` | `web/` (except `web/building3d/`), `services/hub/`, `shared/`, `services/mock/` |
 
 **Kameran and Elisa** split the Wi-Fi work between themselves at H0.
 Suggested split: Kameran leads firmware and the CSI stream, Elisa leads
@@ -61,7 +61,23 @@ wiring, data collection and the detector, and both test together.
 
 **Optional stretch (Kameran):** the plane-sound idea (aircraft Doppler →
 which part of Edinburgh) can open the talk **only if** gestures are reliable
-by H8. Settings are in `config/default.json` under `aircraft_optional`.
+by H8. Branch `plane-location`, folder `services/aircraft/`. Settings are in `config/default.json` under `aircraft_optional`.
+
+### Branches
+
+| Branch | Who | Contains work in |
+|---|---|---|
+| `main` | everyone (merge target) | the working, demo-ready version |
+| `room-location` | Anna | `services/acoustics/`, `services/pressure/`, `assets/building/`, `web/building3d/` |
+| `wifi-gesture` | Kameran + Elisa | `firmware/xiao/`, `services/wifi/` |
+| `plane-location` | Kameran (optional) | `services/aircraft/` |
+| `website` | Shangran | `web/`, `services/hub/`, `shared/`, `services/mock/` |
+| `night/agent` | overnight agent | created at H8 from `main` |
+
+Each branch only changes its own folders, so merges into `main` don't
+conflict. Merge to `main` after every working step and pull `main` into your
+branch often (`git pull origin main`) to pick up the others' work. Kameran and
+Elisa share `wifi-gesture`: pull before you start, commit small, push often.
 
 ---
 
