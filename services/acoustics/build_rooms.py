@@ -23,6 +23,15 @@ def _scale(trace: Dict[str, Any], meas: Dict[str, Any]) -> tuple[float, str]:
     if ref.get("length_m") and ref.get("length_pt"):
         return float(ref["length_m"]) / float(ref["length_pt"]), \
             f"measured: {ref.get('description', ref.get('room_id'))}"
+    if ref.get("room_id") and ref.get("length_m") and ref.get("width_m"):
+        # Tape-measured rectangular room: long side <-> long side, short <-> short, averaged.
+        poly = next(r["polygon_pt"] for r in trace["rooms"] if r["room_id"] == ref["room_id"])
+        xs, ys = [p[0] for p in poly], [p[1] for p in poly]
+        a, b = max(xs) - min(xs), max(ys) - min(ys)
+        L_pt, W_pt = max(a, b), min(a, b)
+        L_m, W_m = max(ref["length_m"], ref["width_m"]), min(ref["length_m"], ref["width_m"])
+        return (L_m / L_pt + W_m / W_pt) / 2, \
+            f"measured: {ref['room_id']} taped {L_m} x {W_m} m"
     return float(trace["default_scale_m_per_pt"]), "estimated from seat counts"
 
 

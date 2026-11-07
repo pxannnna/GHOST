@@ -174,3 +174,14 @@ def test_corridor_is_rejected_not_forced_into_a_room(sweep):
     out = rank(positions, rooms)
     assert out["status"] == "no_match"
     assert out["non_room"]["best"] == "corridor"
+
+
+def test_scale_from_taped_room_reproduces_its_size():
+    """Scale set from Yew's taped 14.5 x 11.5 m: Yew must come out at that size (+-2%)."""
+    trace = json.loads((ROOT / "assets/building/trace_nucleus.json").read_text())
+    out = build(trace, {"scale_reference": {"room_id": "nuc-2-yew", "length_m": 14.5, "width_m": 11.5}})
+    yew = next(r for r in out["rooms"] if r["room_id"] == "nuc-2-yew")
+    xs, ys = [p[0] for p in yew["polygon_m"]], [p[1] for p in yew["polygon_m"]]
+    L, W = sorted([max(xs) - min(xs), max(ys) - min(ys)], reverse=True)
+    assert L == pytest.approx(14.5, rel=0.02) and W == pytest.approx(11.5, rel=0.02)
+    assert out["scale_source"].startswith("measured")

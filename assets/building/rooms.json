@@ -13,8 +13,8 @@
   },
   "also_used": "Nucleus Sensory Map (https://science-engineering.ed.ac.uk/sites/default/files/2025-05/Nucleus%20Sensory%20Map.pdf) for the first scale estimate"
  },
- "scale_m_per_pt": 0.0775,
- "scale_source": "estimated from seat counts",
+ "scale_m_per_pt": 0.07027,
+ "scale_source": "measured: nuc-2-yew taped 14.5 x 11.5 m",
  "scope": "enclosed rooms only (no corridors, atrium, caf\u00e9, open study zones, plant, staff rooms)",
  "floors_excluded": [
   "LG"
@@ -30,52 +30,52 @@
    "kind": "lecture_theatre",
    "polygon_m": [
     [
-     47.422,
-     55.831
+     42.997,
+     50.622
     ],
     [
-     33.495,
-     55.761
+     30.37,
+     50.558
     ],
     [
-     33.503,
-     44.671
+     30.377,
+     40.503
     ],
     [
-     32.426,
-     44.609
+     29.4,
+     40.447
     ],
     [
-     32.426,
-     41.819
+     29.4,
+     37.917
     ],
     [
-     32.728,
-     41.765
+     29.674,
+     37.868
     ],
     [
-     32.767,
-     39.835
+     29.71,
+     36.118
     ],
     [
-     34.929,
-     39.835
+     31.67,
+     36.118
     ],
     [
-     34.937,
-     40.463
+     31.677,
+     36.687
     ],
     [
-     47.887,
-     40.471
+     43.419,
+     36.694
     ],
     [
-     47.887,
-     44.679
+     43.419,
+     40.51
     ],
     [
-     47.461,
-     44.679
+     43.033,
+     40.51
     ]
    ],
    "ceiling_height_m": 4.0,
@@ -85,8 +85,8 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced",
-   "area_m2": 221.0,
-   "approximate": true,
+   "area_m2": 181.7,
+   "approximate": false,
    "seats": 140
   },
   {
@@ -99,20 +99,20 @@
    "kind": "retail",
    "polygon_m": [
     [
-     35.263,
-     40.068
+     31.972,
+     36.329
     ],
     [
-     47.895,
-     40.068
+     43.426,
+     36.329
     ],
     [
-     47.895,
-     26.35
+     43.426,
+     23.891
     ],
     [
-     35.263,
-     26.35
+     31.972,
+     23.891
     ]
    ],
    "ceiling_height_m": 3.0,
@@ -122,7 +122,7 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced (approximate outline)",
-   "area_m2": 173.3,
+   "area_m2": 142.5,
    "approximate": true
   },
   {
@@ -135,28 +135,28 @@
    "kind": "study_room",
    "polygon_m": [
     [
-     44.252,
-     10.873
+     40.123,
+     9.859
     ],
     [
-     41.354,
-     15.074
+     37.495,
+     13.667
     ],
     [
-     39.944,
-     17.12
+     36.216,
+     15.522
     ],
     [
-     43.532,
-     19.096
+     39.47,
+     17.314
     ],
     [
-     47.895,
-     19.096
+     43.426,
+     17.314
     ],
     [
-     47.872,
-     13.446
+     43.405,
+     12.192
     ]
    ],
    "ceiling_height_m": 3.0,
@@ -166,8 +166,8 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced",
-   "area_m2": 43.6,
-   "approximate": true
+   "area_m2": 35.8,
+   "approximate": false
   },
   {
    "room_id": "nuc-12-oak",
@@ -180,36 +180,36 @@
    "kind": "lecture_theatre",
    "polygon_m": [
     [
-     24.025,
-     52.529
+     21.783,
+     47.628
     ],
     [
-     24.04,
-     55.908
+     21.797,
+     50.692
     ],
     [
-     1.217,
-     55.908
+     1.103,
+     50.692
     ],
     [
-     1.217,
-     38.797
+     1.103,
+     35.176
     ],
     [
-     24.04,
-     38.797
+     21.797,
+     35.176
     ],
     [
-     24.025,
-     42.168
+     21.783,
+     38.233
     ],
     [
-     26.505,
-     42.168
+     24.032,
+     38.233
     ],
     [
-     26.505,
-     52.529
+     24.032,
+     47.628
     ]
    ],
    "ceiling_height_m": 5.25,
@@ -219,8 +219,8 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced",
-   "area_m2": 416.0,
-   "approximate": true,
+   "area_m2": 342.0,
+   "approximate": false,
    "seats": 400,
    "note": "fixed rake spanning floors 1-2; entered at the bottom from floor 1 and at the top from floor 2"
   },
@@ -234,36 +234,36 @@
    "kind": "lecture_theatre",
    "polygon_m": [
     [
-     51.778,
-     55.885
+     46.946,
+     50.671
     ],
     [
-     32.612,
-     55.885
+     29.569,
+     50.671
     ],
     [
-     32.604,
-     34.673
+     29.562,
+     31.438
     ],
     [
-     36.789,
-     34.681
+     33.357,
+     31.445
     ],
     [
-     36.789,
-     31.992
+     33.357,
+     29.007
     ],
     [
-     47.05,
-     31.992
+     42.66,
+     29.007
     ],
     [
-     47.05,
-     34.681
+     42.66,
+     31.445
     ],
     [
-     51.778,
-     34.681
+     46.946,
+     31.445
     ]
    ],
    "ceiling_height_m": 3.0,
@@ -273,8 +273,8 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced",
-   "area_m2": 434.1,
-   "approximate": true,
+   "area_m2": 356.9,
+   "approximate": false,
    "seats": 300
   },
   {
@@ -287,20 +287,20 @@
    "kind": "study_room",
    "polygon_m": [
     [
-     -0.496,
-     11.873
+     -0.45,
+     10.765
     ],
     [
-     4.34,
-     11.873
+     3.935,
+     10.765
     ],
     [
-     4.34,
-     8.657
+     3.935,
+     7.849
     ],
     [
-     -0.496,
-     8.657
+     -0.45,
+     7.849
     ]
    ],
    "ceiling_height_m": 2.45,
@@ -310,7 +310,7 @@
    ],
    "ceiling_source": "estimated (same as nuc-3-studyroom)",
    "outline_source": "traced",
-   "area_m2": 15.6,
+   "area_m2": 12.8,
    "approximate": true
   },
   {
@@ -323,20 +323,20 @@
    "kind": "study_room",
    "polygon_m": [
     [
-     4.503,
-     11.873
+     4.083,
+     10.765
     ],
     [
-     9.339,
-     11.873
+     8.467,
+     10.765
     ],
     [
-     9.339,
-     8.657
+     8.467,
+     7.849
     ],
     [
-     4.503,
-     8.657
+     4.083,
+     7.849
     ]
    ],
    "ceiling_height_m": 2.45,
@@ -346,7 +346,7 @@
    ],
    "ceiling_source": "estimated (same as nuc-3-studyroom)",
    "outline_source": "traced",
-   "area_m2": 15.6,
+   "area_m2": 12.8,
    "approximate": true
   },
   {
@@ -359,32 +359,32 @@
    "kind": "study_room",
    "polygon_m": [
     [
-     41.827,
-     21.591
+     37.924,
+     19.577
     ],
     [
-     46.849,
-     21.591
+     42.477,
+     19.577
     ],
     [
-     46.88,
-     20.011
+     42.505,
+     18.143
     ],
     [
-     46.112,
-     19.607
+     41.81,
+     17.778
     ],
     [
-     46.376,
-     19.236
+     42.049,
+     17.441
     ],
     [
-     42.741,
-     16.748
+     38.753,
+     15.185
     ],
     [
-     41.819,
-     18.135
+     37.917,
+     16.443
     ]
    ],
    "ceiling_height_m": 2.45,
@@ -394,7 +394,7 @@
    ],
    "ceiling_source": "estimated (same as nuc-3-studyroom)",
    "outline_source": "traced",
-   "area_m2": 17.7,
+   "area_m2": 14.5,
    "approximate": true
   },
   {
@@ -407,20 +407,20 @@
    "kind": "lecture_theatre",
    "polygon_m": [
     [
-     38.564,
-     55.072
+     34.966,
+     49.933
     ],
     [
-     51.383,
-     55.072
+     46.588,
+     49.933
     ],
     [
-     51.383,
-     39.246
+     46.588,
+     35.584
     ],
     [
-     38.564,
-     39.246
+     34.966,
+     35.584
     ]
    ],
    "ceiling_height_m": 4.0,
@@ -430,9 +430,13 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced",
-   "area_m2": 202.9,
-   "approximate": true,
-   "seats": 150
+   "area_m2": 166.8,
+   "approximate": false,
+   "seats": 150,
+   "tape_measured_dims_m": {
+    "length": 14.5,
+    "width": 11.5
+   }
   },
   {
    "room_id": "nuc-2-rowan",
@@ -444,44 +448,44 @@
    "kind": "studio",
    "polygon_m": [
     [
-     37.572,
-     26.877
+     34.066,
+     24.369
     ],
     [
-     49.29,
-     26.877
+     44.691,
+     24.369
     ],
     [
-     49.267,
-     26.373
+     44.67,
+     23.912
     ],
     [
-     51.995,
-     26.373
+     47.143,
+     23.912
     ],
     [
-     51.995,
-     29.481
+     47.143,
+     26.73
     ],
     [
-     51.444,
-     29.481
+     46.644,
+     26.73
     ],
     [
-     51.444,
-     36.123
+     46.644,
+     32.752
     ],
     [
-     51.971,
-     36.123
+     47.122,
+     32.752
     ],
     [
-     51.971,
-     38.68
+     47.122,
+     35.071
     ],
     [
-     37.572,
-     38.657
+     34.066,
+     35.05
     ]
    ],
    "ceiling_height_m": 3.5,
@@ -491,8 +495,8 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced",
-   "area_m2": 167.7,
-   "approximate": true,
+   "area_m2": 137.9,
+   "approximate": false,
    "seats": 60
   },
   {
@@ -505,52 +509,52 @@
    "kind": "studio",
    "polygon_m": [
     [
-     21.692,
-     0.922
+     19.668,
+     0.836
     ],
     [
-     21.692,
-     5.58
+     19.668,
+     5.059
     ],
     [
-     21.111,
-     5.572
+     19.141,
+     5.052
     ],
     [
-     21.157,
-     12.408
+     19.183,
+     11.25
     ],
     [
-     15.283,
-     12.408
+     13.857,
+     11.25
     ],
     [
-     15.252,
-     22.979
+     13.829,
+     20.835
     ],
     [
-     3.278,
-     22.979
+     2.972,
+     20.835
     ],
     [
-     3.263,
-     21.894
+     2.958,
+     19.851
     ],
     [
-     2.991,
-     21.894
+     2.712,
+     19.851
     ],
     [
-     2.991,
-     0.922
+     2.712,
+     0.836
     ],
     [
-     3.519,
-     0.403
+     3.19,
+     0.365
     ],
     [
-     21.165,
-     0.38
+     19.19,
+     0.344
     ]
    ],
    "ceiling_height_m": 3.5,
@@ -560,8 +564,8 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced",
-   "area_m2": 350.1,
-   "approximate": true,
+   "area_m2": 287.8,
+   "approximate": false,
    "seats": 132
   },
   {
@@ -574,32 +578,32 @@
    "kind": "study_room",
    "polygon_m": [
     [
-     41.78,
-     21.591
-    ],
-    [
-     46.857,
-     21.576
-    ],
-    [
-     46.857,
-     19.964
-    ],
-    [
-     46.105,
+     37.882,
      19.577
     ],
     [
-     46.329,
-     19.22
+     42.484,
+     19.563
     ],
     [
-     42.749,
-     16.709
+     42.484,
+     18.101
     ],
     [
-     41.773,
-     18.135
+     41.803,
+     17.75
+    ],
+    [
+     42.007,
+     17.427
+    ],
+    [
+     38.76,
+     15.15
+    ],
+    [
+     37.875,
+     16.443
     ]
    ],
    "ceiling_height_m": 2.45,
@@ -609,7 +613,7 @@
    ],
    "ceiling_source": "estimated (same as nuc-3-studyroom)",
    "outline_source": "traced",
-   "area_m2": 17.9,
+   "area_m2": 14.7,
    "approximate": true
   },
   {
@@ -622,40 +626,40 @@
    "kind": "lab",
    "polygon_m": [
     [
-     26.877,
-     58.451
+     24.369,
+     52.997
     ],
     [
-     26.768,
-     60.837
+     24.271,
+     55.161
     ],
     [
-     1.039,
-     60.837
+     0.942,
+     55.161
     ],
     [
-     0.992,
-     38.735
+     0.899,
+     35.12
     ],
     [
-     8.262,
-     38.758
+     7.491,
+     35.141
     ],
     [
-     8.262,
-     39.099
+     7.491,
+     35.451
     ],
     [
-     19.739,
-     39.107
+     17.897,
+     35.458
     ],
     [
-     19.739,
-     38.719
+     17.897,
+     35.106
     ],
     [
-     26.854,
-     38.735
+     24.348,
+     35.12
     ]
    ],
    "ceiling_height_m": 2.45,
@@ -665,8 +669,8 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced",
-   "area_m2": 567.0,
-   "approximate": true
+   "area_m2": 466.1,
+   "approximate": false
   },
   {
    "room_id": "nuc-3-studyroom",
@@ -678,24 +682,24 @@
    "kind": "study_room",
    "polygon_m": [
     [
-     30.628,
-     14.64
+     27.77,
+     13.274
     ],
     [
-     34.147,
-     14.779
+     30.96,
+     13.4
     ],
     [
-     34.147,
-     9.92
+     30.96,
+     8.994
     ],
     [
-     31.589,
-     8.308
+     28.641,
+     7.533
     ],
     [
-     30.628,
-     9.688
+     27.77,
+     8.784
     ]
    ],
    "ceiling_height_m": 2.45,
@@ -705,7 +709,7 @@
    ],
    "ceiling_source": "measured",
    "outline_source": "traced (approximate outline)",
-   "area_m2": 19.8,
+   "area_m2": 16.3,
    "approximate": true
   }
  ]

@@ -9,7 +9,7 @@
   },
   "origin_pt": [190, 900],
   "default_scale_m_per_pt": 0.0775,
-  "_scale_comment": "ESTIMATED: 0.125 m/pt on the Sensory Map (from seat counts) x 0.62 (Rowan and the building width are 0.618 / 0.624 times smaller there). Replace by tape-measuring one wall: measurements.json scale_reference.",
+  "_scale_comment": "Fallback only. The real scale comes from measurements.json scale_reference (Yew taped 14.5 x 11.5 m -> 0.0703 m/pt).",
   "rooms": [
     {"room_id": "nuc-0-elm", "label": "Elm Lecture Theatre (G.02)", "floor_ids": ["0"], "kind": "lecture_theatre", "seats": 140,
      "polygon_pt": [[801.9,179.6],[622.2,180.5],[622.3,323.6],[608.4,324.4],[608.4,360.4],[612.3,361.1],[612.8,386.0],[640.7,386.0],[640.8,377.9],[807.9,377.8],[807.9,323.5],[802.4,323.5]]},
