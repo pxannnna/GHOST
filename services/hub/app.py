@@ -33,7 +33,7 @@ SESSION_ID = os.environ.get("SESSION_ID", "session-001")
 VIEWS = ["sky", "building", "radio"]
 GESTURE_COOLDOWN_S = float(CFG["wifi"]["gesture"]["cooldown_s"])
 
-app = FastAPI(title="Invisible Signals hub")
+app = FastAPI(title="GHOST hub")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],

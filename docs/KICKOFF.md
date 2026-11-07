@@ -1,4 +1,6 @@
-# Invisible Signals — kickoff plan
+# GHOST — kickoff plan
+
+**G**athering **H**idden **O**bservations from **S**ound & **T**ransmissions
 
 **HackTheBurgh 2026 · The Nucleus, King's Buildings · 4 people · 24 hours**
 Pitch: *"Hear where you are. Feel which floor. Control the room with radio."*

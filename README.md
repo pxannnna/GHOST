@@ -1,4 +1,6 @@
-# Invisible Signals (HackTheBurgh 2026)
+# GHOST (HackTheBurgh 2026)
+
+**G**athering **H**idden **O**bservations from **S**ound & **T**ransmissions
 
 *Hear where you are. Feel which floor. Control the room with radio.*
 

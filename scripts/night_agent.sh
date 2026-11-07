@@ -19,7 +19,7 @@ git rev-parse --abbrev-ref HEAD | grep -q '^night/agent$' || { echo "checkout ni
 touch "$LOG"
 
 read -r -d '' PROMPT <<'EOF'
-You are the overnight agent for the Invisible Signals hackathon repo.
+You are the overnight agent for the GHOST hackathon repo.
 Read docs/KICKOFF.md section 7 and docs/NIGHT_QUEUE.md. Obey the Constraints
 section of the queue without exception.
 
