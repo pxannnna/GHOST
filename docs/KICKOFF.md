@@ -33,9 +33,9 @@ mount, built from Kameran's parts.
 
 | Letter | Person | Owns | Hardware in hand |
 |---|---|---|---|
-| **A — audio/DSP** | 4th teammate (strongest Python + numerics) | `services/aircraft/`, track archive, Doppler model, grid search | DJI Mic Mini receiver → laptop |
+| **A — audio/DSP** | **Elisa** | `services/aircraft/`, track archive, Doppler model, grid search | DJI Mic Mini receiver → laptop |
 | **B — embedded/ML** | **Kameran** | `firmware/xiao/`, `services/wifi/`, gesture data + detector, the physical rig | XIAO ESP32C6, wires, soldering kit, hotspot phone |
-| **C — integration/sensors** | **Jonathan** | `services/hub/`, `shared/`, `config/`, `services/pressure/`, floor logic, replay, runbook | Phone barometer app |
+| **C — integration/sensors** | **Shangran** | `services/hub/`, `shared/`, `config/`, `services/pressure/`, floor logic, replay, runbook | Phone barometer app |
 | **D — UI/demo + night-agent host** | **Anna** | `web/`, `assets/floorplans/`, pitch, backup video, overnight loop | Demo laptop |
 
 Rules: each owner stubs their producer in the first hour so nobody waits on
@@ -98,7 +98,7 @@ held-out evaluation, rehearsal, submission.
 
 ### Day 1 — H0 to H8 (everyone present, each with an agent)
 
-| Hour | A (audio) | B (Kameran, embedded) | C (Jonathan, integration) | D (Anna, UI/demo) | Checkpoint |
+| Hour | A (Elisa, audio) | B (Kameran, embedded) | C (Shangran, integration) | D (Anna, UI/demo) | Checkpoint |
 |---|---|---|---|---|---|
 | **0–1** | Confirm DJI capture path on Laptop A (`services/aircraft/capture.py`, log capture-start UTC + sample count). Start airplanes.live logger **now** (`make aircraft-log`). Confirm rate limit/terms. | Flash `esp-csi` example to XIAO, confirm serial CSI frames appear. Fix hotspot in place. | `make hub`, health check. Publish schema (`shared/schema.py`) to the group. Install phyphox on the phone, confirm `GET /get?pressure` works from the laptop. | Vite+TS shell with three views and mode badges, driven by `GET /state` + `WS /ws`. Trace Nucleus floor outline as SVG (approximate, labelled). | **H1 meeting:** real sample or named blocker from all four. Decide one-XIAO (router) vs two-XIAO (ESP-NOW). |
 | **1–3** | Go outside with Laptop A + DJI; record ≥30 min continuous, note location (GPS pin) and start UTC. Ideally catch a turboprop (Loganair/Eastern). | Stream CSI to `services/wifi/capture.py`, log raw to `data/`, send `wifi.features` at 10 Hz. Verify motion visibly changes the trace. | `services/pressure/phyphox_source.py` → `pressure.sample`. Re-zero at floor 0, walk floors 0→3 by stairs, log it. `services/mock/` producer emitting schema-correct events for all types (mode=simulated). | UI consumes mock events. Sky map (Leaflet/MapLibre), spectrogram canvas, pressure trace, CSI trace. Everything labelled "SIMULATED". | **H3 gate:** if no CSI, B does firmware/hotspot only; C+D continue with mock. |
@@ -122,7 +122,7 @@ Priority order for the agent:
 
 ### Day 2 — H16 to H24
 
-| Hour | A | B | C | D | Checkpoint |
+| Hour | A (Elisa) | B (Kameran) | C (Shangran) | D (Anna) | Checkpoint |
 |---|---|---|---|---|---|
 | **16–17** | Review agent branch `night/agent`: run tests, read `docs/NIGHT_LOG.md`, merge what passes. | Same for gesture work. | Same for hub/replay/pressure. Restart the full stack from `make` targets only. | Same for UI. | Merge decisions made; nothing half-merged. |
 | **17–19** | **Held-out** acoustic evaluation on a clip not used for tuning; record distance error + competing fits. If possible, one more outdoor capture. | Held-out gesture trials (10 attempts, second person) + 5-minute negative trial. Record 8/10 and false-positive counts. | Held-out floor visits after re-zero; record outcomes. Disconnect/reconnect each sensor; no duplicate advance. | Verify every display against logs. Build the pitch deck (6 slides max). | **H18 feature freeze.** |
