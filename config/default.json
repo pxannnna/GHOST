@@ -54,7 +54,7 @@
   "building": {
     "id": "nucleus",
     "label": "The Nucleus",
-    "floorplan": "/floorplans/nucleus-placeholder.svg",
+    "floorplan": "assets/building/",
     "floors": [
       { "id": "0", "label": "Ground" },
       { "id": "1", "label": "First" },

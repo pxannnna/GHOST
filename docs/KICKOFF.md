@@ -3,233 +3,258 @@
 **HackTheBurgh 2026 · The Nucleus, King's Buildings · 4 people · 24 hours**
 Pitch: *"Hear where you are. Feel which floor. Control the room with radio."*
 
-This file is the single plan we follow. It merges the team spec (v1.0), the
-dopplertrack methodology, the materials Kameran has, and the floor-pressure
-survey we already took. Every person works with their own AI agent during the
-day; Anna's laptop runs an unattended agent loop overnight on hardware-free
-tasks. Read §2 (roles) and §5 (your block) first, then come back to the rest.
+This is the plan everyone follows. It fixes **what** each person delivers,
+**the interfaces between people**, and **the deadlines**. It deliberately does
+**not** fix how you build your part: each owner decides their own tools,
+libraries and approach, and works with their own AI agent. If you change an
+interface (§4), tell the person on the other side first.
 
 ---
 
-## 1. What we are building (one paragraph)
+## 1. The demo we are building toward
 
-A laptop app with three views. **Sky:** a real aircraft Doppler signature from
-the DJI mic, matched against real ADS-B tracks, producing a bounded Edinburgh
-location estimate with its ambiguity shown honestly. **Building:** the
-prepared Nucleus floor plan with the floor chosen by the phone barometer,
-calibrated against our own survey. **Radio:** a live Wi-Fi CSI trace from the
-XIAO ESP32C6; one deliberate double hand-sweep advances the view. Every sensor
-has a mode badge (live / replay / simulated / configured) and nothing that is
-configured is ever shown as measured.
+A presentation that runs on our own website. The audience sees, in order:
 
-Tracks: **G-Research** (invisible → visible) is the primary target. **HRT**
-(signals → probabilistic estimate → decision) is the secondary pitch. The
-physical "device" is the sensing rig: XIAO puck + marked gesture zone + mic
-mount, built from Kameran's parts.
+1. **Sky.** A recording of aircraft noise, its Doppler curve, the real ADS-B
+   track it matches, and the resulting **estimate of where in Edinburgh we
+   are**, with the remaining ambiguity shown.
+2. **Building.** A **3D model of the Nucleus**, built from the floor plan.
+   The phone barometer picks the **floor**, which lights up in the model.
+3. **Radio.** A live Wi-Fi signal trace from the XIAO. The presenter makes a
+   **hand gesture** and the slide changes. Then a judge tries it.
 
----
+The **gesture-driven slide change** is the signature moment. Every slide
+change in the talk is done by gesture, with a keyboard fallback.
 
-## 2. Roles (suggested; swap by real strength at minute 5)
+### What each sensor can honestly claim
 
-| Letter | Person | Owns | Hardware in hand |
-|---|---|---|---|
-| **A — audio/DSP** | **Elisa** | `services/aircraft/`, track archive, Doppler model, grid search | DJI Mic Mini receiver → laptop |
-| **B — embedded/ML** | **Kameran** | `firmware/xiao/`, `services/wifi/`, gesture data + detector, the physical rig | XIAO ESP32C6, wires, soldering kit, hotspot phone |
-| **C — integration/sensors** | **Shangran** | `services/hub/`, `shared/`, `config/`, `services/pressure/`, floor logic, replay, runbook | Phone barometer app |
-| **D — UI/demo + night-agent host** | **Anna** | `web/`, `assets/floorplans/`, pitch, backup video, overnight loop | Demo laptop |
-
-Rules: each owner stubs their producer in the first hour so nobody waits on
-hardware. Person C coordinates schema changes but does not fix other modules.
-Nobody edits another owner's directory without a message.
-
----
-
-## 3. Materials and how each is used
-
-| Item | Use | Setup notes |
+| Capability | What we can claim | What we must not claim |
 |---|---|---|
-| **Seeed XIAO ESP32C6** ([PiHut](https://thepihut.com/products/seeed-xiao-esp32c6?variant=53972794442113)) | CSI receiver, USB-serial to laptop | Default is the onboard ceramic antenna; the board also has a U.FL socket if we need the external antenna. Flash with ESP-IDF 5.x + `esp-csi`. If we have **two** XIAOs, use `csi_send` + `csi_recv` (ESP-NOW) instead of the router example: no hotspot compatibility risk. |
-| **Phone hotspot** (2.4 GHz) | CSI transmitter if only one XIAO | Disable hotspot sleep, keep plugged in, fixed position 2–3 m from the XIAO. Internet not required. |
-| **DJI Mic Mini** | Aircraft audio into Laptop A | Turn **off** noise cancelling and low-cut; windscreen outdoors; record 48 kHz mono WAV; keep the raw file. |
-| **Phone barometer app** | Pressure → floor | Prefer **phyphox** (free, iOS/Android): *Pressure* experiment → "Allow remote access" → laptop polls `http://<phone-ip>/get?pressure`. Fallback: any app that exports CSV, read by `services/pressure/`. |
-| Wires, perfboard, soldering kit, 3D printer | The rig (§6) | Keep it small: a puck for the XIAO, a stand for the mic, a tape-marked gesture zone. |
+| Plane sounds | Estimate the **recording location** within a bounded Edinburgh search, with competing regions | Room-level or person-level position |
+| Barometer | **Which floor**, after calibrating against our survey | Absolute floor without a reference reading |
+| Wi-Fi (one XIAO + one transmitter) | **Motion** near the link and **one deliberate gesture** | Tracking where people are in the room, counting people, body pose |
+| 3D model | A **prepared model** of the Nucleus from its floor plan | That the model was sensed or reconstructed |
 
-### Floor survey (already measured, 7 Nov 2026)
-
-| Floor | Reading (hPa) | Δ from floor 0 (Pa) | Relative height at 12 Pa/m |
-|---|---|---|---|
-| 0 | 1013.221 | 0 | 0.0 m |
-| 1 | 1012.506 | 71.5 | 5.96 m |
-| 2 | 1011.910 | 131.1 | 10.93 m |
-| 3 | 1011.217 | 200.4 | 16.70 m |
-
-Floor spacing is ~60–72 Pa (5–6 m), which is far above sensor noise (~1–3 Pa),
-so classification is easy **once re-zeroed**. The absolute values will drift
-with the weather over 24 h, so Person C re-zeroes at floor 0 before the demo
-and only the deltas are reused. These values are in `config/default.json`
-under `pressure.survey`.
+Every view shows a mode badge: **live**, **replay**, **simulated** or
+**configured**. Configured or replayed data is never presented as measured.
 
 ---
 
-## 4. What already exists in the repo (built before kickoff)
+## 2. Who owns what
 
-| Path | Status | Notes |
+| Person | Owns | Helps with | Branch | Folders |
+|---|---|---|---|---|
+| **Kameran** | **Plane sounds → location.** Recording, ADS-B archive, Doppler matching, Edinburgh search, results | Lends the XIAO and DJI mic; rig hardware advice | `audio` | `services/aircraft/` |
+| **Anna** | **3D Nucleus model** and **gesture recognition** (from the CSI stream to a `gesture.detected` event). Hosts the overnight agent | — | `building-3d`, `gesture` | `web/building3d/`, `assets/building/`, `services/wifi/` |
+| **Elisa** | **The website**: slide deck + live dashboard, driven by hub events; slide change on gesture | **Gesture:** data collection, labelling, testing with different people | `web` | `web/` (except `web/building3d/`) |
+| **Shangran** | **Everything that connects the parts:** hub + schema, XIAO bring-up and CSI streaming, phone barometer → floor, replay, runbook, the physical rig | Whoever is blocked | `hub` | `services/hub/`, `shared/`, `config/`, `services/pressure/`, `services/mock/`, `firmware/xiao/`, `assets/hardware/` |
+
+How the gesture work splits: **Shangran** gets CSI frames flowing from the XIAO
+to the laptop (firmware, hotspot, serial). **Anna** turns that stream into a
+reliable gesture detector. **Elisa** collects and labels trials with Anna, and
+makes the website react to the gesture.
+
+---
+
+## 3. Materials
+
+| Item | Who holds it | Use |
 |---|---|---|
-| `shared/schema.py` | done | Event envelope + payload models for every event type in the spec, plus `aircraft.tracks` and `replay.progress`. Validation rejects malformed payloads. |
-| `shared/client.py` | done | `EventClient`: non-blocking queue, retries, never stalls acquisition. |
-| `shared/config.py`, `config/default.json` | done | Search bounds, collection region, configured location, floor survey. Overrides go in `config/local.json` (git-ignored). |
-| `services/hub/app.py` | done, untested | FastAPI hub: `POST /events`, `GET /state`, `WS /ws`, demo controls, gesture cooldown + calibration gating, session log at `data/sessions/<id>/events.jsonl`. |
-| `services/hub/replay.py` | done, untested | Deterministic replay with `replay.progress` events. |
-| `.venv/`, `requirements.txt` | done | Python 3.10 venv (spec says 3.11+; code is 3.10-compatible — don't use `match` or `tomllib`). |
-| `services/aircraft/`, `services/wifi/`, `services/pressure/`, `services/mock/`, `web/`, `firmware/xiao/` | empty | Owners start here. |
+| Seeed XIAO ESP32C6 ([PiHut](https://thepihut.com/products/seeed-xiao-esp32c6?variant=53972794442113)) | Shangran (from Kameran) | Wi-Fi CSI receiver over USB. If there are two, a send/receive pair avoids the hotspot entirely. |
+| Phone hotspot, 2.4 GHz | Shangran | CSI transmitter. Fixed position, plugged in, sleep off. |
+| DJI Mic Mini | Kameran | Aircraft recordings. Noise cancelling and low-cut **off**. Keep raw files. |
+| Phone barometer app | Shangran | Floor. phyphox can stream to the laptop; CSV export is the fallback. |
+| Wires, soldering kit, 3D printer | Shangran (Kameran advises) | XIAO puck, transmitter cradle, mic clip, taped gesture zone. |
 
-First thing Person C does: `make hub` and `curl localhost:8000/health`.
-First thing everyone does: run `tests/` once the mock producer exists.
+### Floor survey (measured 7 Nov 2026, in `config/default.json`)
 
----
+| Floor | hPa | Δ from floor 0 | ≈ height |
+|---|---|---|---|
+| 0 | 1013.221 | 0 Pa | 0.0 m |
+| 1 | 1012.506 | 71.5 Pa | 6.0 m |
+| 2 | 1011.910 | 131.1 Pa | 10.9 m |
+| 3 | 1011.217 | 200.4 Pa | 16.7 m |
 
-## 5. Timeline: 8 h humans → 8 h agent → 8 h humans
+Floors are 60–72 Pa apart, well above phone-sensor noise. Weather shifts the
+absolute values over 24 h, so re-zero at floor 0 before the demo and use only
+the differences. Floor heights also tell Anna how tall to make each storey of
+the 3D model.
 
-Hours are relative to kickoff. **Day 1 (H0–H8)** ends with every sensor
-either producing a real sample or a declared fallback, and a complete,
-labelled data capture for the agent to work on. **Night (H8–H16)** the agent
-loop improves hardware-free code. **Day 2 (H16–H24)** is integration,
-held-out evaluation, rehearsal, submission.
-
-### Day 1 — H0 to H8 (everyone present, each with an agent)
-
-| Hour | A (Elisa, audio) | B (Kameran, embedded) | C (Shangran, integration) | D (Anna, UI/demo) | Checkpoint |
-|---|---|---|---|---|---|
-| **0–1** | Confirm DJI capture path on Laptop A (`services/aircraft/capture.py`, log capture-start UTC + sample count). Start airplanes.live logger **now** (`make aircraft-log`). Confirm rate limit/terms. | Flash `esp-csi` example to XIAO, confirm serial CSI frames appear. Fix hotspot in place. | `make hub`, health check. Publish schema (`shared/schema.py`) to the group. Install phyphox on the phone, confirm `GET /get?pressure` works from the laptop. | Vite+TS shell with three views and mode badges, driven by `GET /state` + `WS /ws`. Trace Nucleus floor outline as SVG (approximate, labelled). | **H1 meeting:** real sample or named blocker from all four. Decide one-XIAO (router) vs two-XIAO (ESP-NOW). |
-| **1–3** | Go outside with Laptop A + DJI; record ≥30 min continuous, note location (GPS pin) and start UTC. Ideally catch a turboprop (Loganair/Eastern). | Stream CSI to `services/wifi/capture.py`, log raw to `data/`, send `wifi.features` at 10 Hz. Verify motion visibly changes the trace. | `services/pressure/phyphox_source.py` → `pressure.sample`. Re-zero at floor 0, walk floors 0→3 by stairs, log it. `services/mock/` producer emitting schema-correct events for all types (mode=simulated). | UI consumes mock events. Sky map (Leaflet/MapLibre), spectrogram canvas, pressure trace, CSI trace. Everything labelled "SIMULATED". | **H3 gate:** if no CSI, B does firmware/hotspot only; C+D continue with mock. |
-| **3–6** | Spectrogram (40–1000 Hz, long FFTs). Find a ridge by eye; manual ridge selection is fine. Implement Doppler model (`doppler.py`): emission-time solve, slant range with `ground_height_m`, `f_r = f_s / (1 + ṙ/c)`. Overlay predicted curve at the **known** recording location. | Build the rig (§6). Collect **25 positive** double-sweep trials and **≥5 min negatives** (still, typing, walking past, single sweep). Label by trial in `data/gesture/`. | Floor classifier: median filter → relative height → nearest survey level with 0.6 m hysteresis + 3 s dwell → `floor.estimate`. Hub replay tested with a saved session. | Real streams replace mocks. Status badges show stale/offline correctly (unplug test). Floor highlight on SVG. | **H6 gate:** A has one real signature with predicted curve overlaid **or** switches to manual annotation / reference replay. C has live floor or declared configured-floor fallback. |
-| **6–8** | Bounded grid search (`search.py`): 200 m grid over `search_bounds`, score curves, keep top-k regions, emit `location.estimate` with status rules. Save ground truth separately (`data/ground_truth.json`, not read by search). | Template/threshold detector v1 (`gesture.py`): two energy pulses, gap 0.25–1.2 s, quiet before, 2 s cooldown → `gesture.detected`. Test live on the rig. | Integration pass: all producers → hub → UI. `make` targets work. Write `docs/RUNBOOK.md` draft. | Gesture advances the real UI. Record first evidence screenshots. Draft pitch wording with claim limits. | **H8 handover:** everything committed on `main`; `data/` captures copied to a shared drive; `docs/NIGHT_QUEUE.md` filled in; agent loop started on Anna's laptop. |
-
-### Night — H8 to H16 (agent loop; one person on call by phone)
-
-The agent cannot touch hardware, so the day must leave it: real audio WAVs
-with ground truth, the ADS-B archive, labelled CSI trials, the floor walk log,
-and one saved hub session. Tasks are in `docs/NIGHT_QUEUE.md`, ordered by
-value. The loop is described in §7.
-
-Priority order for the agent:
-1. `tests/` for schema, hub, replay, Doppler model (synthetic track → known curve).
-2. Aircraft: automatic ridge extraction, timing-offset fit within bounds, two-event locked scoring (dopplertrack method), evaluation script that reports distance error against `data/ground_truth.json` **without reading it during search**.
-3. Gesture: train/validate a simple classifier (features → logistic regression or template matching) on `data/gesture/` with trial-level splits; write results to `docs/RESULTS.md`.
-4. UI polish: replay banner, event history panel, candidate-region rendering, keyboard shortcuts.
-5. `README.md`, `docs/RUNBOOK.md`, `docs/RESULTS.md`, acknowledgements and licences.
-6. Replay fixture: a compact permitted session under `data/fixtures/` for the demo.
-
-### Day 2 — H16 to H24
-
-| Hour | A (Elisa) | B (Kameran) | C (Shangran) | D (Anna) | Checkpoint |
-|---|---|---|---|---|---|
-| **16–17** | Review agent branch `night/agent`: run tests, read `docs/NIGHT_LOG.md`, merge what passes. | Same for gesture work. | Same for hub/replay/pressure. Restart the full stack from `make` targets only. | Same for UI. | Merge decisions made; nothing half-merged. |
-| **17–19** | **Held-out** acoustic evaluation on a clip not used for tuning; record distance error + competing fits. If possible, one more outdoor capture. | Held-out gesture trials (10 attempts, second person) + 5-minute negative trial. Record 8/10 and false-positive counts. | Held-out floor visits after re-zero; record outcomes. Disconnect/reconnect each sensor; no duplicate advance. | Verify every display against logs. Build the pitch deck (6 slides max). | **H18 feature freeze.** |
-| **19–21** | Fix only acquisition/correctness bugs. | Tune cooldown/thresholds only. | Packaging, `README` setup, restart rehearsal on the demo laptop. | Record backup video of the real system (replay parts labelled). | Complete restart from written commands succeeds. |
-| **21–23** | Support rehearsal | Support rehearsal | Submission text, results sheet | Final rehearsal ×3, timing under 2 min | No dependency changes. |
-| **23–24** | Buffer | Buffer | Submit | Submit | Submitted before deadline. |
+### References
+- Aircraft method: [colsto's video](https://www.youtube.com/watch?v=UytYrhYLOKI), [mjshiggins/dopplertrack](https://github.com/mjshiggins/dopplertrack), [AlanBacker/audio-flyover-geolocation](https://github.com/AlanBacker/audio-flyover-geolocation). The dopplertrack methodology (prop/jet filtering by ICAO type, 200 m grid, slant distance with a DEM, emission-time Doppler, locked two-event scoring) is a good template.
+- Flight data: [airplanes.live API](https://airplanes.live/api-guide) (no key, 1 req/s) or [OpenSky](https://openskynetwork.github.io/opensky-api/rest.html). Neither gives free history: **start logging at H0**.
+- Wi-Fi: [espressif/esp-csi](https://github.com/espressif/esp-csi), [XIAO ESP32C6 guide](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/).
 
 ---
 
-## 6. The physical rig (Kameran, H3–H6, ~2 h)
+## 4. Interfaces between people (agree by H1, then keep stable)
 
-Keep it tangible but small; the spec excludes sonar, people-tracking and 3D.
+These are the only things you must not change on your own.
 
-1. **CSI puck.** XIAO on a small perfboard inside a 3D-printed puck (~50 mm),
-   USB-C cable out the side, a status LED on the top (GPIO → LED via 220 Ω)
-   that blinks on each CSI frame and holds solid when a gesture fires. Mount
-   at fixed height on a printed stand so orientation never changes after
-   calibration.
-2. **Transmitter stand.** A printed cradle that holds the hotspot phone (or
-   the second XIAO) 2–3 m away at the same height, taped to the table.
-3. **Gesture zone.** Tape a 40 × 40 cm square on the table between puck and
-   transmitter, slightly toward the puck. Judges put their hand here.
-4. **Mic mount.** A printed clip for the DJI Mic Mini with windscreen, for
-   the outdoor captures and the table demo.
-5. **Optional, only if everything else works by H6:** a printed "floor
-   indicator" — four LEDs in a column driven by the laptop over the XIAO's
-   serial, lighting the detected floor. It is a nice physical echo of the UI.
+### 4.1 Events through the hub (Shangran owns)
+Every producer POSTs events to the hub (`http://127.0.0.1:8000/events`); the
+website listens on `ws://127.0.0.1:8000/ws` and can fetch `GET /state` on
+reconnect. The envelope and payload fields are defined in `shared/schema.py`
+and checked on arrival. The hub is already written and tested.
 
-Print files go in `assets/hardware/`; a photo and wiring sketch go in
-`docs/RUNBOOK.md`.
+| Event | Sent by | Used by |
+|---|---|---|
+| `aircraft.tracks`, `aircraft.signature`, `location.estimate` | Kameran | Elisa (Sky slide) |
+| `pressure.sample`, `floor.estimate` | Shangran | Elisa, Anna (floor highlight) |
+| `wifi.features` | Shangran's CSI streamer (or Anna's detector) | Elisa (Radio slide), Anna |
+| `gesture.detected` | Anna | Hub → `demo.state` → Elisa (slide change) |
+| `demo.state`, `source.status`, `replay.progress` | Hub / every producer | Elisa |
+
+The hub decides slide changes, not the website: it applies the 2-second
+cooldown, ignores gestures while not armed or while calibrating, and emits
+`demo.state`. This means a gesture changes the slide once, however many
+browser tabs are open. The website also offers manual controls
+(`POST /demo/next`, keyboard) as a fallback.
+
+To use Python helpers: `from shared.client import EventClient`. To produce
+from another language, POST the JSON envelope directly.
+
+### 4.2 3D model → website (Anna ↔ Elisa)
+Anna delivers a self-contained component in `web/building3d/` that Elisa
+mounts in a slide. Minimum contract:
+
+```ts
+mountBuilding(container: HTMLElement, opts?: {}) => {
+  setFloor(floorId: "0" | "1" | "2" | "3" | null): void;   // highlight; null = none
+  setMode(mode: "live" | "replay" | "simulated" | "configured"): void;
+  dispose(): void;
+}
+```
+
+Anna picks the tech (three.js, Babylon, a glTF exported from Blender…).
+Elisa picks the web framework. If Elisa's stack can't import Anna's module
+directly, the fallback is an `<iframe>` with `postMessage({floor, mode})`.
+
+### 4.3 CSI stream → gesture detector (Shangran ↔ Anna)
+Shangran delivers raw CSI frames on the laptop, in a format both agree at H1
+(e.g. a serial reader that yields `{t, rssi, amplitudes[]}` per frame, plus a
+logger that saves them to `data/csi/*.jsonl`). Anna's detector consumes that
+and emits `gesture.detected`. Labelled trials go in `data/gesture/` with a
+trial ID on every window, so splits can be done by trial.
 
 ---
 
-## 7. Overnight agent loop on Anna's laptop (H8–H16)
+## 5. What each person delivers, by when
 
-**Principle:** the agent works only on hardware-free tasks, on its own branch,
-with tests as the acceptance gate, and leaves a log a human can audit in ten
-minutes. It never touches `main`, `data/` raw captures, dependency versions
-or anything under `firmware/`.
+Each row says **what must exist**, not how to build it. Your agent can plan
+the how. Report at each checkpoint with a real artefact or a named blocker.
 
-Setup at H8 (10 minutes):
+### Kameran — plane sounds → location
 
+| By | Deliverable |
+|---|---|
+| H0 + 10 min | ADS-B logger running and saving to `data/adsb/` (never stop it). |
+| H1 | DJI audio reaching the laptop with UTC start time logged. |
+| H3 | ≥30 min outdoor recording with the exact recording position stored **separately** in `data/ground_truth.json`. |
+| H6 | **Gate:** one real aircraft signature on a spectrogram with the predicted Doppler curve overlaid, at the known location. If no usable tone: manual ridge marking, or a clearly labelled reference replay. |
+| H8 | Search over the Edinburgh box producing `location.estimate` events (even if rough), data copied to the shared drive, night tasks written. |
+| H16–18 | Blind evaluation on a clip **not used for tuning**: distance error and competing regions, in `docs/RESULTS.md`. |
+
+Your decisions: provider, FFT settings, ridge method, scoring method, how far
+to automate. Fixed: the Edinburgh search box in `config/default.json`, never
+reading ground truth inside the search, and labelling replay as replay.
+
+### Anna — 3D Nucleus model + gesture recognition
+
+| By | Deliverable |
+|---|---|
+| H1 | Floor plan sourced (university estates PDF, photos of fire-exit plans, or a traced outline); tech choice made; agree the CSI frame format with Shangran. |
+| H3 | 3D model with 4 storeys at survey heights, rotating in a browser, `setFloor()` working against mock events. |
+| H6 | Model handed to Elisa through the §4.2 contract. Gesture detector v1 running on the live CSI stream, sending `gesture.detected`. |
+| H8 | 25+ labelled positive trials and 5+ min of negatives (with Elisa); detector tuned; night tasks written. |
+| H16–18 | Held-out test: ≥8/10 gestures by a **second person**, ≤1 false slide change in 5 min of normal activity. Results in `docs/RESULTS.md`. |
+
+Your decisions: modelling tool and level of detail, the gesture itself (it
+must be deliberate and distinctive, e.g. a double sweep), features,
+classifier. Fixed: one gesture class only, a score is not a percentage, and
+if only general motion works it is called a "motion trigger".
+
+### Elisa — website (slides + live dashboard)
+
+| By | Deliverable |
+|---|---|
+| H1 | Framework chosen; page connected to the hub WebSocket and showing incoming events. |
+| H3 | Slide deck skeleton (title, Sky, Building, Radio, results, thank you) changing on `demo.state` and on the keyboard, with mode badges and stale/offline indicators. |
+| H6 | Live charts: Doppler curve (observed vs predicted), Edinburgh map with tracks and candidate regions, pressure trace, CSI motion trace. Anna's 3D model mounted. |
+| H8 | Full talk clickable end to end with mock events; gesture data collection with Anna done; night tasks written. |
+| H16–20 | Real data in every slide, replay banner, backup video recorded, pitch under 2 minutes, rehearsed 3 times. |
+
+Your decisions: framework, slide design, charts library, which events to
+show. Fixed: slide changes come from the hub's `demo.state`, every sensor
+shows its mode, and configured data is visibly marked.
+
+### Shangran — hub, XIAO bring-up, floor, integration
+
+| By | Deliverable |
+|---|---|
+| H0 + 10 min | `make hub` running, `/health` reachable by everyone on the same network. |
+| H1 | XIAO flashed and printing CSI frames; frame format agreed with Anna. Phone barometer reachable from the laptop. Mock producer started so Elisa has data. |
+| H3 | CSI streaming and logging at a measured packet rate; `wifi.features` reaching the hub. Floor walk 0→3 by stairs recorded. **Gate:** no CSI by H3 → only firmware/hotspot work until it works. |
+| H6 | `floor.estimate` events with hysteresis and dwell; replay of a saved session works. Rig printed and fixed in place. |
+| H8 | Everything merged into `main`; `data/` copied to the shared drive; night agent started with Anna. |
+| H16–21 | Unplug/replug tests (other parts keep running, no duplicate slide changes), full restart from `make` commands, `README` + `docs/RUNBOOK.md`, submission. |
+
+Your decisions: firmware variant (router vs two-board ESP-NOW), pressure
+transport, floor algorithm, rig design. Fixed: the event contract unless all
+owners agree.
+
+---
+
+## 6. Timeline: 8 h together → 8 h agent → 8 h together
+
+| Hours | What happens |
+|---|---|
+| **H0–H1** | Clone, branch, run `make hub`. Each person sets up their agent with this file and their row in §5. Kameran starts ADS-B logging. **H1 stand-up (10 min):** confirm the §4 interfaces. |
+| **H1–H8** | Build. Stand-ups at **H3, H6, H8**: 2 minutes each, show an artefact or name a blocker. Merge to `main` after every working step, not at the end. |
+| **H8** | **Hard stop.** Merge, copy data to the shared drive, fill in `docs/NIGHT_QUEUE.md` (each person adds their own tasks), start the night loop on Anna's laptop, sleep. |
+| **H8–H16** | Overnight agent works through the queue on branch `night/agent` (§7). |
+| **H16–H17** | Each owner reviews the agent's work in their area and merges what passes. |
+| **H17–H18** | Held-out evaluations (aircraft, gesture, floor). **H18: feature freeze.** |
+| **H18–H21** | Bug fixes only. Full restart rehearsal. Backup video. |
+| **H21–H24** | Rehearse ×3, submit before the deadline. |
+
+### Hard gates
+- **H3:** no CSI stream → Shangran works only on firmware/hotspot; Anna builds the detector on recorded or simulated data meanwhile.
+- **H6:** no aircraft tone → Kameran switches to manual ridge or labelled replay. No phone pressure stream → labelled configured floor.
+- **H10 (next morning check):** gesture false triggers dominate → simplify to a deliberate motion trigger.
+- **H18:** feature freeze. No new libraries, no redesigns after this.
+
+---
+
+## 7. Overnight agent on Anna's laptop (H8–H16)
+
+The agent can only work on things that don't need hardware, so Day 1 must
+leave it **data**: the aircraft recordings + ADS-B archive + ground truth,
+labelled gesture trials, the floor walk, and one saved hub session.
+
+At H8:
 ```bash
 git checkout -b night/agent
-cp docs/NIGHT_QUEUE.template.md docs/NIGHT_QUEUE.md   # then fill in specifics
-caffeinate -dims &                                    # keep the Mac awake
-scripts/night_agent.sh                                # see script header
+cp docs/NIGHT_QUEUE.template.md docs/NIGHT_QUEUE.md   # everyone adds their tasks
+caffeinate -dims &
+NIGHT_END="2026-11-08T07:00" scripts/night_agent.sh
 ```
 
-`scripts/night_agent.sh` runs `claude -p` in a loop. Each iteration gets the
-same prompt: read `docs/NIGHT_QUEUE.md`, pick the first unchecked task, do it,
-run `make test`, commit on `night/agent` with a message starting `night:`,
-tick the task and append a 3-line entry to `docs/NIGHT_LOG.md`. If tests fail
-twice on the same task it marks it `BLOCKED` with the reason and moves on.
-A task that needs hardware, credentials or a human decision is marked
-`NEEDS-HUMAN`. The loop stops at the time in `NIGHT_END` or when the queue is
-empty.
+The script runs the agent in a loop, one queue task per iteration: implement,
+run `make test`, commit with a `night:` prefix, tick the task, log what it did
+in `docs/NIGHT_LOG.md`. It never touches `main`, `firmware/`, dependencies or
+raw data, and marks tasks `BLOCKED` or `NEEDS-HUMAN` rather than guessing.
 
-What to leave it (checked at H8):
-- `data/audio/*.wav` + `data/audio/*.json` (start UTC, location, device)
-- `data/adsb/*.jsonl` (the archive from `make aircraft-log`)
-- `data/ground_truth.json` (recording positions; search code must not open it)
-- `data/gesture/trials.jsonl` (labelled CSI windows, trial IDs)
-- `data/pressure/floor_walk.jsonl`
-- `data/sessions/session-001/events.jsonl`
-
-Morning review (H16, 30 min): `git log night/agent`, `make test`, read
-`NIGHT_LOG.md`, cherry-pick or merge. Anything the agent marked `BLOCKED`
-becomes a human task for Day 2.
+At H16 each owner reviews `git log night/agent` for their folders and merges
+what passes.
 
 ---
 
-## 8. Commands (owners implement; keep these names)
+## 8. Ground rules
 
-```
-make hub              # C   uvicorn hub on :8000, SESSION_ID env selects the log
-make web              # D   vite dev server on :5173
-make mock             # C   all-type simulated producer for UI development
-make aircraft-log     # A   airplanes.live archiver (start at H0, never stop)
-make audio-live       # A   DJI capture + spectrogram + signature events
-make audio-analyse WAV=... # A  offline pipeline on a recording
-make wifi-live        # B   XIAO serial → features + gesture events
-make pressure-live    # B/C phyphox poll → pressure + floor events
-make replay SESSION=session-001
-make test             # all   pytest tests/
-```
-
----
-
-## 9. Hard gates (do not argue with these at 3 am)
-
-- **H1** no real sample from a sensor → its owner names the blocker in chat and stubs the producer.
-- **H3** no CSI → Kameran works only on firmware/hotspot (or switches to two-XIAO ESP-NOW).
-- **H6** no usable aircraft tone → A goes manual ridge + known-location overlay, or labelled reference replay.
-- **H6** no phone pressure stream → configured floor, labelled; C moves to integration.
-- **H8** handover is a hard stop: commit, copy data, start the loop, go to sleep.
-- **H18** feature freeze.
-- Never: show configured/replay as measured; turn a score into a percentage; add gesture classes; search outside the Edinburgh box; modify university networking.
-
----
-
-## 10. Claim wording for the pitch (D owns, everyone obeys)
-
-- "We **estimate** location from aircraft Doppler, bounded to Edinburgh; this run was **[live / replay]** and landed **X m** from ground truth with **N** competing regions."
-- "The floor is from a phone barometer **calibrated against our survey**; absolute floors need a reference."
-- "The gesture is a **deliberate double sweep** recognised from Wi-Fi CSI; held-out result **8/10**, **k** false triggers in 5 min."
-- "The floor plan is a **prepared asset**, not inferred."
-
-Acknowledge: colsto's video, `mjshiggins/dopplertrack`,
-`AlanBacker/audio-flyover-geolocation`, Espressif `esp-csi`, airplanes.live.
+- Your folder, your decisions. Touching someone else's folder: message them first.
+- Merge small working steps to `main` often via PR; never force-push `main`.
+- Raw data stays out of git; copy it to the shared drive.
+- Commands live in the `Makefile`; anything needed for the demo must start from it.
+- Credentials go in `.env` or `config/local.json` (both git-ignored).
+- Credit what we reuse (videos, repos, APIs) in the README and on the final slide.
