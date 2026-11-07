@@ -4,14 +4,17 @@
 
 *Hear where you are. Feel which floor. Control the room with radio.*
 
+A laptop works out which room of the Nucleus it is in, from a phone barometer
+(floor) and echolocation (room size, matched against the floor plan), shown in
+a 3D model. The talk's slides change with a hand gesture sensed through Wi-Fi.
+
 **Start here:** [`docs/KICKOFF.md`](docs/KICKOFF.md) has the plan, interfaces, deadlines and gates.
 
 | Person | Owns | Branch | Folders |
 |---|---|---|---|
-| Kameran | Plane sounds → location | `audio` | `services/aircraft/` |
-| Anna | 3D Nucleus model, gesture recognition, night agent | `building-3d`, `gesture` | `web/building3d/`, `assets/building/`, `services/wifi/` |
-| Elisa | Website: slides + live dashboard; helps with gestures | `web` | `web/` |
-| Shangran | Hub, schema, XIAO bring-up, barometer floor, integration, rig | `hub` | `services/hub/`, `shared/`, `config/`, `services/pressure/`, `services/mock/`, `firmware/xiao/`, `assets/hardware/` |
+| Anna | Echolocation, barometer floor, room matching, 3D Nucleus model, night agent | `room`, `building-3d` | `services/acoustics/`, `services/pressure/`, `web/building3d/`, `assets/building/` |
+| Kameran + Elisa | Wi-Fi gestures: XIAO firmware, wiring, CSI stream, gesture detection | `wifi` | `firmware/xiao/`, `services/wifi/` |
+| Shangran | Website (slides + dashboard) and the event hub | `web` | `web/`, `services/hub/`, `shared/`, `services/mock/` |
 
 ## Setup
 
@@ -24,10 +27,10 @@ git checkout <your branch>
 
 Then give your AI agent `docs/KICKOFF.md` and tell it which person you are.
 
-Machine-specific settings (serial ports, phone IP) go in `config/local.json`, which is git-ignored.
+Machine-specific settings (serial ports, phone IP, transmitter MAC) go in `config/local.json`, which is git-ignored.
 Raw recordings go in `data/` (git-ignored); copy them to the shared drive at H8.
 
 ## Git rules
-- Work on your branch; merge small working steps to `main` often via PR.
+- Work on your branch; merge small working steps to `main` often.
 - Never force-push `main`. Changes to `shared/schema.py` go through Shangran.
 - No credentials in git.

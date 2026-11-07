@@ -2,30 +2,27 @@ PY := .venv/bin/python
 SESSION ?= session-001
 export SESSION_ID := $(SESSION)
 
-.PHONY: hub web mock aircraft-log audio-live audio-analyse wifi-live pressure-live replay test
+.PHONY: hub web mock echo-measure room-live pressure-live wifi-live replay test
 
-hub:            ## Person C
+hub:            ## Shangran
 	$(PY) -m uvicorn services.hub.app:app --host 127.0.0.1 --port 8000
 
-web:            ## Person D
+web:            ## Shangran
 	cd web && npm run dev
 
-mock:           ## Person C — simulated producer for all event types
+mock:           ## Shangran — simulated producer for all event types
 	$(PY) -m services.mock.producer
 
-aircraft-log:   ## Person A — start at H0 and never stop
-	$(PY) -m services.aircraft.tracklog
+echo-measure:   ## Anna — one sweep at one position: make echo-measure ROOM=demo POS=P1
+	$(PY) -m services.acoustics.measure --room $(ROOM) --position $(POS)
 
-audio-live:     ## Person A
-	$(PY) -m services.aircraft.live
+room-live:      ## Anna — floor + echoes -> ranked rooms
+	$(PY) -m services.acoustics.live
 
-audio-analyse:  ## Person A — make audio-analyse WAV=data/audio/x.wav
-	$(PY) -m services.aircraft.analyse $(WAV)
-
-wifi-live:      ## Person B
+wifi-live:      ## Kameran + Elisa
 	$(PY) -m services.wifi.live
 
-pressure-live:  ## Person B/C — phyphox poll
+pressure-live:  ## Anna — phyphox poll -> floor
 	$(PY) -m services.pressure.live
 
 replay:         ## make replay SESSION=session-001

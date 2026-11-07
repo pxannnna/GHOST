@@ -1,4 +1,4 @@
-"""Deterministic session replay (spec §7, §12). Owner: Person C.
+"""Deterministic session replay (spec §7, §12). Owner: Shangran.
 
 Re-posts a saved session's producer events to the running hub with
 mode="replay" and session_id="replay-of-<id>". Original timestamp_utc values

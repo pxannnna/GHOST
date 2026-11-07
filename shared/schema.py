@@ -1,6 +1,6 @@
 """Common event envelope and per-type payload schemas (spec §4).
 
-Owner: Person C. Changes must be agreed with all producer owners.
+Owner: Shangran. Changes must be agreed with all producer owners.
 
 Every producer sends one `Event`. The hub validates the envelope *and* the
 payload for the declared `type`, so a malformed payload is rejected at the
@@ -16,7 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 SCHEMA_VERSION = 1
 
 Mode = Literal["live", "replay", "simulated", "configured"]
-Source = Literal["aircraft", "audio", "wifi", "pressure", "hub", "demo", "mock"]
+Source = Literal["aircraft", "audio", "acoustics", "wifi", "pressure", "hub", "demo", "mock"]
 
 
 class _Payload(BaseModel):
@@ -101,8 +101,35 @@ class GestureDetected(_Payload):
     window_ms: int
 
 
+class AcousticMeasurement(_Payload):
+    """One echolocation sweep at one position in a room (Anna)."""
+    measurement_id: str
+    position_label: Optional[str] = None          # e.g. "P1 table centre"
+    rt60_s: Optional[float] = None                # reverberation time
+    reflection_distances_m: List[float] = Field(default_factory=list)  # strongest early reflections
+    snr_db: Optional[float] = None
+    impulse_response_preview: Optional[List[float]] = None  # downsampled, for display only
+
+
+class RoomCandidate(_Payload):
+    room_id: str
+    label: Optional[str] = None
+    score: float  # match score, NOT a probability
+
+
+class RoomEstimate(_Payload):
+    """Ranked rooms on the current floor (Anna). Same status vocabulary as location."""
+    status: Literal["listening", "candidate", "supported", "ambiguous", "no_match"]
+    floor_id: Optional[str] = None
+    floor_source: Literal["measured", "configured", "manual"] = "measured"
+    estimated_dims_m: Optional[Dict[str, float]] = None  # length, width, height
+    candidates: List[RoomCandidate] = Field(default_factory=list)
+    method: str
+    supporting_measurement_ids: List[str] = Field(default_factory=list)
+
+
 class DemoState(_Payload):
-    current_view: Literal["sky", "building", "radio"]
+    current_view: str  # slide id; the list of slides lives in config demo.views
     selected_building: Optional[str] = None
     selected_room: Optional[str] = None
     selection_source: Literal["measured", "configured", "manual"] = "configured"
@@ -124,6 +151,8 @@ PAYLOAD_MODELS: Dict[str, type] = {
     "location.estimate": LocationEstimate,
     "pressure.sample": PressureSample,
     "floor.estimate": FloorEstimate,
+    "acoustic.measurement": AcousticMeasurement,
+    "room.estimate": RoomEstimate,
     "wifi.features": WifiFeatures,
     "gesture.detected": GestureDetected,
     "demo.state": DemoState,

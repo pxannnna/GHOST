@@ -1,4 +1,4 @@
-"""Event hub (spec §4, §7). Owner: Person C.
+"""Event hub (spec §4, §7). Owner: Shangran.
 
 POST /events   producers submit events (validated, deduplicated, logged)
 GET  /health   liveness
@@ -30,7 +30,7 @@ from shared.schema import iso_from_unix, utc_now_iso, validate_event
 
 CFG = load_config()
 SESSION_ID = os.environ.get("SESSION_ID", "session-001")
-VIEWS = ["sky", "building", "radio"]
+VIEWS = list(CFG["demo"]["views"])
 GESTURE_COOLDOWN_S = float(CFG["wifi"]["gesture"]["cooldown_s"])
 
 app = FastAPI(title="GHOST hub")
@@ -56,7 +56,7 @@ class Hub:
 
         b = CFG["building"]
         self.demo: Dict[str, Any] = {
-            "current_view": "sky",
+            "current_view": VIEWS[0],
             "selected_building": b["label"],
             "selected_room": b.get("configured_room"),
             "selection_source": "configured",
@@ -72,6 +72,7 @@ class Hub:
         self.last_by_source: Dict[str, Dict[str, Any]] = {}
         self.latest: Dict[str, Dict[str, Any]] = {}       # key: event type
         self.signatures: Deque[Dict[str, Any]] = deque(maxlen=20)
+        self.acoustic: Deque[Dict[str, Any]] = deque(maxlen=40)
         self.gestures: Deque[Dict[str, Any]] = deque(maxlen=30)
         self.pressure_hist: Deque[List[float]] = deque(maxlen=600)
         self.wifi_hist: Deque[List[float]] = deque(maxlen=600)
@@ -114,6 +115,8 @@ class Hub:
                 self.calibrating.discard(k)
         elif t == "aircraft.signature":
             self.signatures.append(r)
+        elif t == "acoustic.measurement":
+            self.acoustic.append(r)
         elif t == "pressure.sample" and p.get("relative_height_m") is not None:
             self.pressure_hist.append([r["received_unix"], p["relative_height_m"]])
         elif t == "wifi.features":
@@ -174,15 +177,15 @@ class Hub:
             "last_by_source": self.last_by_source,
             "latest": self.latest,
             "signatures": list(self.signatures),
+            "acoustic_measurements": list(self.acoustic),
             "gestures": list(self.gestures),
             "pressure_hist": list(self.pressure_hist),
             "wifi_hist": list(self.wifi_hist),
             "replay": self.replay,
             "config": {
-                "search_bounds": CFG["search_bounds"],
-                "configured_location": CFG["configured_location"],
+                "views": VIEWS,
                 "building": CFG["building"],
-                "aircraft_collection": CFG["aircraft_collection"],
+                "pressure_survey": CFG["pressure"]["survey"],
             },
             "counters": {"accepted": self.accepted, "rejected": self.rejected},
         }

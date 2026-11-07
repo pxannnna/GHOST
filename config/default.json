@@ -1,42 +1,33 @@
 {
-  "_comment": "Committed defaults. Put machine-specific overrides (serial ports, calibration) in config/local.json (git-ignored).",
+  "_comment": "Committed defaults. Put machine-specific overrides (serial ports, phone IP, calibration) in config/local.json (git-ignored).",
   "hub": { "host": "127.0.0.1", "port": 8000, "stale_after_ms": 5000 },
 
-  "search_bounds": {
-    "_comment": "Explicit Edinburgh box for the acoustic search. Deliberately NOT centred on the venue.",
-    "lat_min": 55.880, "lat_max": 55.995, "lon_min": -3.400, "lon_max": -3.050
-  },
-  "aircraft_collection": {
-    "_comment": "Wider than the search box: audible aircraft may be outside Edinburgh. radius in nautical miles.",
-    "provider": "airplanes.live",
-    "center_lat": 55.94, "center_lon": -3.22, "radius_nm": 40,
-    "poll_interval_s": 2.0
+  "demo": {
+    "_comment": "Slide ids in order. The hub advances through these on gesture or keyboard. Shangran owns this list.",
+    "views": ["intro", "floor", "room", "model", "gesture", "results"]
   },
 
-  "configured_location": {
-    "_comment": "CONFIGURED presentation context only. Never displayed as a measured acoustic result.",
-    "label": "The Nucleus, King's Buildings (approximate, configured)",
-    "latitude": 55.9227, "longitude": -3.1750
-  },
-
-  "audio": { "samplerate": 48000, "channels": 1, "device": null, "chunk_seconds": 60 },
-
-  "acoustics": {
+  "echolocation": {
+    "_comment": "Anna. Starting values only; tune on real recordings.",
+    "samplerate": 48000,
+    "sweep": { "f_start_hz": 200, "f_end_hz": 20000, "duration_s": 3.0, "repeats": 3, "silence_after_s": 2.0 },
     "speed_of_sound_mps": 343.0,
-    "ground_height_m": 80.0,
-    "_ground_comment": "Approximate flat ground height above MSL for Edinburgh search (no terrain model). Disclose in results.",
-    "grid_spacing_m": 200,
-    "timing_offset_bounds_s": [-1.0, 1.0]
+    "max_reflection_distance_m": 15.0,
+    "positions_per_room": 4,
+    "rooms_file": "assets/building/rooms.json",
+    "_rooms_comment": "rooms.json: one entry per room with id, floor, label, polygon in metres, ceiling height, and optional surveyed fingerprints."
   },
 
   "wifi": {
     "serial_port": null, "baud": 921600,
-    "gesture": { "window_ms": 1500, "cooldown_s": 2.0, "pulse_threshold": 2.5,
-                 "min_gap_s": 0.25, "max_gap_s": 1.2, "quiet_before_s": 0.6 }
+    "transmitter_mac": null,
+    "_mac_comment": "Required: frames from any other MAC are dropped (venue Wi-Fi interference).",
+    "min_packet_rate_hz": 50,
+    "gesture": { "window_ms": 1500, "cooldown_s": 2.0 }
   },
 
   "pressure": {
-    "_comment": "Source is the phone barometer app streamed over HTTP (phyphox remote access) or a CSV export. Set phone_url in config/local.json, e.g. http://192.168.137.12 .",
+    "_comment": "Phone barometer streamed over HTTP (phyphox remote access) or a CSV export. Set phone_url in config/local.json, e.g. http://192.168.137.12 .",
     "source": "phyphox",
     "phone_url": null,
     "poll_hz": 5,
@@ -53,14 +44,21 @@
 
   "building": {
     "id": "nucleus",
-    "label": "The Nucleus",
-    "floorplan": "assets/building/",
+    "label": "The Nucleus, King's Buildings",
+    "floorplan_dir": "assets/building/",
     "floors": [
       { "id": "0", "label": "Ground" },
       { "id": "1", "label": "First" },
       { "id": "2", "label": "Second" },
       { "id": "3", "label": "Third" }
     ],
-    "configured_room": "Demo table area"
+    "configured_room": null
+  },
+
+  "aircraft_optional": {
+    "_comment": "OPTIONAL stretch (Kameran, only after gestures work): plane sounds -> which part of Edinburgh. Not part of the core demo.",
+    "provider": "airplanes.live",
+    "center_lat": 55.94, "center_lon": -3.22, "radius_nm": 40,
+    "search_bounds": { "lat_min": 55.880, "lat_max": 55.995, "lon_min": -3.400, "lon_max": -3.050 }
   }
 }
