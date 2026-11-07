@@ -1,0 +1,44 @@
+{
+  "reference": "LG lift exit",
+  "reference_altitude_m": 87.6,
+  "phone_height_consistent": true,
+  "source": "User-supplied phone screenshots and confirmed location mapping, 2026-11-07",
+  "note": "Relative sensor elevations approximate floor elevations because phone height was consistent. Absolute altitude is not a surveyed building datum. Independent of the older pressure-service calibration.",
+  "readings": [
+    {"photo": 1, "location": "First floor", "altitude_m": 92.3, "pressure_hpa": 1010.9},
+    {"photo": 2, "location": "Intermediate landing, higher side", "altitude_m": 91.1, "pressure_hpa": 1011.0},
+    {"photo": 3, "location": "Intermediate landing, south lower side", "altitude_m": 90.5, "pressure_hpa": 1011.1},
+    {"photo": 4, "location": "LG lift exit", "altitude_m": 87.6, "pressure_hpa": 1011.4},
+    {"photo": 5, "location": "Ground lower side", "altitude_m": 87.9, "pressure_hpa": 1011.4},
+    {"photo": 6, "location": "Ground south higher side", "altitude_m": 88.3, "pressure_hpa": 1011.3},
+    {"photo": 7, "location": "Second floor", "altitude_m": 98.3, "pressure_hpa": 1010.1}
+  ],
+  "floors": {
+    "LG": {"elevation_m": 0.0, "provenance": "phone_altitude_relative_estimate"},
+    "0": {"elevation_m": 0.3, "provenance": "phone_altitude_relative_estimate"},
+    "1": {"elevation_m": 4.7, "provenance": "phone_altitude_relative_estimate"},
+    "2": {"elevation_m": 10.7, "provenance": "phone_altitude_relative_estimate"},
+    "3": {"elevation_m": 16.7, "provenance": "extrapolated_equal_storey_height", "note": "Second floor plus the 6.0 m First-to-Second interval; not measured."}
+  },
+  "ground_split": {
+    "south_elevation_m": 0.7,
+    "south_room_ids": ["nucleus-cafe"],
+    "boundary_pdf_points": [[98, 700], [590, 700], [636, 850]],
+    "note": "Provisional split across the cafe-side floor and central stair edge, inferred from the plan. Exact survey point positions and split boundary were not supplied. Entrance-side study remains on the lower side."
+  },
+  "central_stair": {
+    "floor_id": "0",
+    "direction": "clockwise ascending in plan view",
+    "width_m": 1.4,
+    "landing_size_m": 1.6,
+    "points": [
+      {"label": "G south", "pdf": [540, 724], "elevation_m": 0.7},
+      {"label": "South landing", "pdf": [485, 724], "elevation_m": 2.9},
+      {"label": "Higher landing", "pdf": [485, 620], "elevation_m": 3.5},
+      {"label": "First floor", "pdf": [540, 620], "elevation_m": 4.7}
+    ],
+    "note": "Schematic clockwise route around the central atrium. Heights follow readings; positions, width and tread count are approximations, not measured stairs."
+  },
+  "alder": {"ceiling_elevation_m": 4.3, "provenance": "estimated_from_elm", "estimated_from": "nuc-0-elm", "note": "User-approved analogy to Elm: 4 m clearance at G (+0.3 m), shared ceiling at LG +4.3 m, giving 4.3 m LG clearance. Internal rake not surveyed."},
+  "oak": {"entrances_flush_with_corridors": true, "note": "First entrance +4.7 m with 7.5 m clearance; Second entrance +10.7 m with 3 m clearance. Ceiling endpoints +12.2 and +13.7 m require a non-flat schematic profile; its horizontal placement is inferred, not surveyed."}
+}

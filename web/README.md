@@ -28,9 +28,17 @@ their source mode and mark old signals stale. The WebSocket sends the current
 snapshot on connection, so a newly opened or reconnected tab follows the
 current slide.
 
-`building3d/index.js` provides the PDF-based Nucleus model using a locally bundled
+`building3d/index.js` provides the metric Nucleus model using a locally bundled
 Three.js renderer. Select a floor, switch between 3D and plan views, adjust layer
-spacing, or inspect a room. The estimated floor and known candidate IDs are
+spacing, or inspect a room's dimensions and supplied or estimated clear height. All plans use
+0.07027 m/PDF point, calibrated from Yew. LG is the height datum and participates
+in the combined model. G has a provisional split-level floor and central stairs;
+First and Second follow the latest phone readings, while Third is extrapolated.
+Alder's clearance is estimated from Elm. The separate model survey preserves
+these readings and assumptions without changing the pressure-service calibration.
+The default view now includes a continuous schematic facade and roof. Switch
+**Show** to **Interior cutaway**, or select a floor, to inspect the existing rooms.
+The estimated floor and known candidate IDs are
 highlighted; unmapped IDs are reported rather than assigned to arbitrary rooms.
 Mock rankings use the named rooms in the plan but remain synthetic.
 See `building3d/README.md` for sources, limitations and regeneration, and

@@ -1,18 +1,18 @@
 import * as THREE from "../vendor/three/three.module.js";
-import data from "./nucleus-data.js";
+import data from "./nucleus-metric-data.js";
 
 export const roomKey = zone => `${zone.userData.floorId}/${zone.userData.room_id}`;
 
 export function visibleMeshes(model) {
   const meshes = [];
   for (const floor of model.floors.values()) {
-    if (floor.group.visible) floor.group.traverse(object => { if (object.isMesh) meshes.push(object); });
+    if (floor.group.visible) floor.group.traverseVisible(object => { if (object.isMesh) meshes.push(object); });
   }
   return meshes;
 }
 
 // Place the label inside a broad part of each polygon, including L-shaped rooms.
-function interiorPoint(polygon) {
+function interiorPoint(polygon, height) {
   const xs = polygon.map(p => p[0]), ys = polygon.map(p => p[1]);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   const minY = Math.min(...ys), maxY = Math.max(...ys);
@@ -30,7 +30,7 @@ function interiorPoint(polygon) {
     });
     if (inside && distance > clearance) { best = [x,y]; clearance = distance; }
   }
-  return new THREE.Vector3((best[0]-460)*data.model_scale, 2.3, (best[1]-500)*data.model_scale);
+  return new THREE.Vector3(best[0], height, best[1]);
 }
 
 export function createLabels(viewport, model, camera, selectRoom, selectFloor) {
@@ -57,7 +57,7 @@ export function createLabels(viewport, model, camera, selectRoom, selectFloor) {
     const key = roomKey(zone);
     const button = makeButton(zone.userData.label, "model-room-label", () => selectRoom(key));
     button.setAttribute("aria-label", `Inspect ${zone.userData.label}, floor ${zone.userData.floorId === "0" ? "G" : zone.userData.floorId}`);
-    return { zone, key, button, anchor: interiorPoint(zone.userData.polygon) };
+    return { zone, key, button, anchor: interiorPoint(zone.userData.polygon_m, zone.userData.label_height_m) };
   });
   const ray = new THREE.Raycaster();
   const overlaps = (a,b) => a.x < b.x+b.w+4 && a.x+a.w+4 > b.x && a.y < b.y+b.h+4 && a.y+a.h+4 > b.y;
@@ -87,8 +87,9 @@ export function createLabels(viewport, model, camera, selectRoom, selectFloor) {
         const {zone, button, key} = entry;
         button.hidden = true;
         button.setAttribute("aria-pressed", String(key === selected));
-        if (!zone.parent.visible) continue;
-        const world = zone.parent.localToWorld(entry.anchor.clone());
+        if (!zone.parent.visible || !zone.visible || zone.userData.focus_muted) continue;
+        const anchor = entry.anchor.clone();
+        const world = zone.parent.localToWorld(anchor);
         const projected = world.clone().project(camera);
         if (Math.abs(projected.x)>1 || Math.abs(projected.y)>1 || Math.abs(projected.z)>1) continue;
         const direction = world.clone().sub(camera.position);

@@ -102,6 +102,8 @@ small, .muted { color: var(--muted); }
 .model-options { padding: 14px 0 0; }
 .model-detail { font-size: 13px; color: var(--ink); margin: 12px 0 5px; overflow-wrap: anywhere; }
 .model-note { font-size: 12px; color: var(--muted); margin: 0; }
+.model-layout-note { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
+.model-spacing-value { color: var(--muted); min-width: 96px; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 12px; padding: 14px 0; }
 .legend i { display: inline-block; width: 9px; height: 9px; border: 1px solid #6a84ba; background: #e1e8f7; margin-right: 4px; }
 .legend span:nth-child(2) i { border-color: #3436b0; background: #5557d8; }

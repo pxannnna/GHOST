@@ -20,10 +20,10 @@ def main() -> None:
     pressure = survey["readings_hpa"][floor] * 100
     # Real plan labels, synthetic rankings: no surveyed room dimensions implied.
     rooms = {
-        "0": [("alder", "Alder"), ("elm", "Elm")],
-        "1": [("oak", "Oak"), ("larch", "Larch")],
-        "2": [("hawthorn", "Hawthorn"), ("rowan", "Rowan"), ("yew", "Yew")],
-        "3": [("chemistry", "Chemistry teaching laboratory")],
+        "0": [("nuc-0-elm", "Elm"), ("nuc-0-shop", "EUSA Shop")],
+        "1": [("nuc-12-oak", "Oak"), ("nuc-1-larch", "Larch")],
+        "2": [("nuc-2-hawthorn", "Hawthorn"), ("nuc-2-rowan", "Rowan"), ("nuc-2-yew", "Yew")],
+        "3": [("nuc-3-chemlab", "Chemistry teaching laboratory")],
     }
     candidates = [
         {"room_id": room_id, "label": label, "score": score}
