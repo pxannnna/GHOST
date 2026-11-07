@@ -35,6 +35,20 @@ def list_devices() -> str:
     return str(_sd().query_devices())
 
 
+def mic_check(input_device: Optional[str], fs: int = 48000, seconds: float = 2.0) -> dict:
+    """Record a few seconds of room sound (nothing is played or saved) and report the level.
+    Exact digital silence almost always means macOS has not granted microphone access."""
+    sd = _sd()
+    i_dev = find_device(input_device, "input")
+    rec = sd.rec(int(seconds * fs), samplerate=fs, channels=1, device=i_dev, dtype="float32")
+    sd.wait()
+    y = rec[:, 0].astype(np.float64)
+    rms = float(np.sqrt(np.mean(y ** 2)))
+    name = sd.query_devices(i_dev if i_dev is not None else sd.default.device[0])["name"]
+    return {"device": name, "rms_dbfs": round(20 * np.log10(max(rms, 1e-12)), 1),
+            "peak": round(float(np.max(np.abs(y))), 4), "silent": rms < 1e-7}
+
+
 def play_and_record(signal: np.ndarray, fs: int, input_device: Optional[str], output_device: Optional[str],
                     gain: float = 0.5, pre_s: float = 0.3, tail_s: float = 3.0) -> Tuple[np.ndarray, dict]:
     """Returns (mono recording float64, info). Latency is NOT compensated here:

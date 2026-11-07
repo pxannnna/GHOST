@@ -44,6 +44,11 @@ DEFAULT_MATCHING: Dict[str, Any] = {
     "span_tolerance_m": 0.15,
     "span_top_n": 4,
     "use_spans": False,
+    # One noisy clue must not veto an otherwise good room: each term is capped, so a single
+    # bad clue costs at most 2.5 sigma while two bad clues still reject the room. RT60 is the
+    # most direct physics term, so it may count much more before it is capped.
+    "term_cap": {"rt60": 25.0, "height": 6.25, "wall": 6.25},
+    "max_ceiling_margin_m": 1.0,
     # "Not a room" hypotheses. If one of these explains the echoes better than every
     # real room, the answer is no_match: GHOST only claims to locate you INSIDE a room.
     "non_room_models": [
@@ -79,16 +84,21 @@ class Combined:
         return float(np.median(self.nearest_walls_m)) if self.nearest_walls_m else None
 
 
-def combine(positions: Sequence[PositionMeasurement], cfg: Dict[str, Any] = DEFAULT_MATCHING) -> Combined:
+def combine(positions: Sequence[PositionMeasurement], cfg: Dict[str, Any] = DEFAULT_MATCHING,
+            max_height_m: Optional[float] = None) -> Combined:
     rts = [p.rt60_s for p in positions if p.rt60_s]
     rt = float(np.median(rts)) if rts else None
     tol = cfg["ceiling_tolerance_m"]
+    mic_h = float(np.median([p.mic_height_m for p in positions])) if positions else 0.75
 
     # Ceiling: a distance (>=1.4 m) seen at >= 60% of positions (needs >=2 positions).
+    # A candidate that would put the ceiling above `max_height_m` (the tallest room that can
+    # be on this floor, plus a margin) is multi-bounce clutter, not a ceiling.
     ceiling = None
     if len(positions) >= 2:
         need = max(2, int(np.ceil(0.6 * len(positions))))
-        cands = sorted({round(d, 2) for p in positions for d in p.reflection_distances_m if d >= 1.4})
+        cands = sorted({round(d, 2) for p in positions for d in p.reflection_distances_m
+                        if d >= 1.4 and (max_height_m is None or d + mic_h <= max_height_m)})
         best = (0, None)
         for c in cands:
             hits = [min((d for d in p.reflection_distances_m if abs(d - c) <= tol), key=lambda d: abs(d - c), default=None)
@@ -97,7 +107,6 @@ def combine(positions: Sequence[PositionMeasurement], cfg: Dict[str, Any] = DEFA
             if len(hits) >= need and len(hits) > best[0]:
                 best = (len(hits), float(np.median(hits)))
         ceiling = best[1]
-    mic_h = float(np.median([p.mic_height_m for p in positions])) if positions else 0.75
     height = None if ceiling is None else ceiling + mic_h
 
     walls, laterals = [], []
@@ -188,6 +197,8 @@ def room_cost(c: Combined, room: Room, cfg: Dict[str, Any] = DEFAULT_MATCHING) -
         sig = cfg.get("sigma_log_span", 0.25)
         terms["span"] = float(sum(min(min(abs(np.log(sp / L)), abs(np.log(sp / W))) / sig, 2.0) ** 2
                                   for sp in c.spans_m))
+    caps = cfg.get("term_cap", {})
+    terms = {k: float(min(v, caps.get(k, np.inf))) for k, v in terms.items()}
     cost = float(sum(terms.values()))
     return {"room": room, "cost": cost, "score": float(np.exp(-cost / 2)), "terms": terms, "predicted": pred}
 
@@ -249,7 +260,8 @@ def non_room_models(cfg: Dict[str, Any]) -> List[Room]:
 def rank(positions: Sequence[PositionMeasurement], rooms: Sequence[Room],
          cfg: Dict[str, Any] = DEFAULT_MATCHING) -> Dict[str, Any]:
     """Returns a dict ready to become a room.estimate payload (minus floor fields)."""
-    c = combine(positions, cfg)
+    max_h = (max(r.ceiling_range_m[1] for r in rooms) + cfg.get("max_ceiling_margin_m", 1.0)) if rooms else None
+    c = combine(positions, cfg, max_h)
     base = {"method": "echo-physics-vs-floorplan v1 (Eyring RT60 + ceiling echo + nearest wall)",
             "supporting_measurement_ids": [p.measurement_id for p in positions],
             "n_positions": c.n_positions,
@@ -264,13 +276,13 @@ def rank(positions: Sequence[PositionMeasurement], rooms: Sequence[Room],
     nulls = sorted((room_cost(c, r, cfg) for r in non_room_models(cfg)), key=lambda x: x["cost"])
     best_null = nulls[0] if nulls else None
     cands = [{"room_id": r["room"].room_id, "label": r["room"].label, "score": round(r["score"], 4),
-              "cost_terms": {k: round(v, 2) for k, v in r["terms"].items()},
+              "cost_terms": {k: round(float(v), 2) for k, v in r["terms"].items()},
               "predicted_rt60_s": round(r["predicted"]["rt60_s"], 2)} for r in results]
 
     best = results[0]
     non_room = None if best_null is None else {
         "best": best_null["room"].label, "score": round(best_null["score"], 4),
-        "cost_terms": {k: round(v, 2) for k, v in best_null["terms"].items()}}
+        "cost_terms": {k: round(float(v), 2) for k, v in best_null["terms"].items()}}
     if best["cost"] > cfg["no_match_cost"]:
         status = "no_match"
     elif best_null is not None and best_null["score"] > best["score"]:

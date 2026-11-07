@@ -4,6 +4,7 @@
     python -m services.acoustics.measure --room nuc-2-rowan --position P1 [--mic-height 0.75]
     python -m services.acoustics.measure --simulate nuc-2-rowan --position P1   # mode=simulated
     python -m services.acoustics.measure --list-devices
+    python -m services.acoustics.measure --mic-check   # 2 s of room sound, nothing played or saved
 
 Plays the sweep `repeats` times, records on the DJI mic, builds the averaged
 impulse response, extracts RT60 + reflections, saves everything under
@@ -160,7 +161,21 @@ def main(argv: Optional[List[str]] = None) -> None:
     ap.add_argument("--simulate", metavar="ROOM_ID", help="simulate this room instead of recording (mode=simulated)")
     ap.add_argument("--no-emit", action="store_true", help="don't send to the hub")
     ap.add_argument("--list-devices", action="store_true")
+    ap.add_argument("--mic-check", action="store_true", help="record 2 s of room sound and report the level")
     a = ap.parse_args(argv)
+    if a.mic_check:
+        from services.acoustics.audio_io import mic_check
+        cfg = echo_cfg()
+        r = mic_check(cfg["input_device"], cfg["samplerate"])
+        print(f"input: {r['device']}   level {r['rms_dbfs']} dBFS   peak {r['peak']}")
+        if r["silent"]:
+            print("SILENT: allow microphone access for your terminal/IDE in System Settings > "
+                  "Privacy & Security > Microphone, then restart the terminal.")
+        elif r["rms_dbfs"] > -30:
+            print("Loud room (> -30 dBFS): echoes will be noisy; find a quieter moment or room.")
+        else:
+            print("OK: the mic is working.")
+        return
     if a.list_devices:
         from services.acoustics.audio_io import list_devices
         print(list_devices())

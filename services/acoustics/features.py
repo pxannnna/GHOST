@@ -93,7 +93,7 @@ def schroeder_rt60(h: np.ndarray, fs: int, skip_direct_ms: float = 3.0
 
 
 def early_reflections(h: np.ndarray, fs: int, c: float = 343.0, speaker_mic_m: float = 0.1,
-                      max_distance_m: float = 15.0, guard_ms: float = 1.5, min_strength_db: float = -12.0,
+                      max_distance_m: float = 15.0, guard_ms: float = 1.5, min_strength_db: float = -16.0,
                       min_contrast_db: float = 6.0, max_n: int = 12, band=(1000.0, 12000.0)) -> List[Reflection]:
     """Strong peaks in the IR envelope after the direct sound.
 

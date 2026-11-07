@@ -40,7 +40,9 @@
       "span_tolerance_m": 0.15,
       "span_top_n": 4,
       "_spans_comment": "Wall-to-wall spans from echo pair-sums. Experimental: unreliable in simulation, so reported but not scored until real recordings show they work.",
-      "use_spans": false
+      "use_spans": false,
+      "term_cap": { "rt60": 25.0, "height": 6.25, "wall": 6.25 },
+      "max_ceiling_margin_m": 1.0
     }
   },
 
