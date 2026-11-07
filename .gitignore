@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+web/dist/
+config/local.json
+.env
+# raw captures: keep locally, copy to the shared drive at H8
+data/
+!data/fixtures/
+!data/.gitkeep
+firmware/xiao/build/
+*.wav
+*.flac
+.DS_Store

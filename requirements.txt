@@ -1,0 +1,11 @@
+# Pin exact versions once the first integrated build runs (spec §11).
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+numpy>=1.26
+scipy>=1.11
+sounddevice>=0.4.6
+soundfile>=0.12
+pyserial>=3.5
+matplotlib>=3.8
+pytest>=8

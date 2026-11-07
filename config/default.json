@@ -1,0 +1,66 @@
+{
+  "_comment": "Committed defaults. Put machine-specific overrides (serial ports, calibration) in config/local.json (git-ignored).",
+  "hub": { "host": "127.0.0.1", "port": 8000, "stale_after_ms": 5000 },
+
+  "search_bounds": {
+    "_comment": "Explicit Edinburgh box for the acoustic search. Deliberately NOT centred on the venue.",
+    "lat_min": 55.880, "lat_max": 55.995, "lon_min": -3.400, "lon_max": -3.050
+  },
+  "aircraft_collection": {
+    "_comment": "Wider than the search box: audible aircraft may be outside Edinburgh. radius in nautical miles.",
+    "provider": "airplanes.live",
+    "center_lat": 55.94, "center_lon": -3.22, "radius_nm": 40,
+    "poll_interval_s": 2.0
+  },
+
+  "configured_location": {
+    "_comment": "CONFIGURED presentation context only. Never displayed as a measured acoustic result.",
+    "label": "The Nucleus, King's Buildings (approximate, configured)",
+    "latitude": 55.9227, "longitude": -3.1750
+  },
+
+  "audio": { "samplerate": 48000, "channels": 1, "device": null, "chunk_seconds": 60 },
+
+  "acoustics": {
+    "speed_of_sound_mps": 343.0,
+    "ground_height_m": 80.0,
+    "_ground_comment": "Approximate flat ground height above MSL for Edinburgh search (no terrain model). Disclose in results.",
+    "grid_spacing_m": 200,
+    "timing_offset_bounds_s": [-1.0, 1.0]
+  },
+
+  "wifi": {
+    "serial_port": null, "baud": 921600,
+    "gesture": { "window_ms": 1500, "cooldown_s": 2.0, "pulse_threshold": 2.5,
+                 "min_gap_s": 0.25, "max_gap_s": 1.2, "quiet_before_s": 0.6 }
+  },
+
+  "pressure": {
+    "_comment": "Source is the phone barometer app streamed over HTTP (phyphox remote access) or a CSV export. Set phone_url in config/local.json, e.g. http://192.168.137.12 .",
+    "source": "phyphox",
+    "phone_url": null,
+    "poll_hz": 5,
+    "pa_per_m": 12.0,
+    "dwell_s": 3.0,
+    "hysteresis_m": 0.6,
+    "survey": {
+      "_comment": "Measured in the Nucleus on 7 Nov 2026 with the phone barometer. Absolute values drift with weather: only the deltas are reused. Re-zero at the reference floor before the demo.",
+      "reference_floor": "0",
+      "readings_hpa": { "0": 1013.221, "1": 1012.506, "2": 1011.910, "3": 1011.217 },
+      "relative_height_m": { "0": 0.0, "1": 5.96, "2": 10.93, "3": 16.70 }
+    }
+  },
+
+  "building": {
+    "id": "nucleus",
+    "label": "The Nucleus",
+    "floorplan": "/floorplans/nucleus-placeholder.svg",
+    "floors": [
+      { "id": "0", "label": "Ground" },
+      { "id": "1", "label": "First" },
+      { "id": "2", "label": "Second" },
+      { "id": "3", "label": "Third" }
+    ],
+    "configured_room": "Demo table area"
+  }
+}
