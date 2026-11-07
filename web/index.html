@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f9">
+  <meta name="description" content="GHOST indoor sensing demo at HackTheBurgh.">
+  <title>GHOST — Indoor sensing demo</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#overview">Skip to content</a>
+  <div class="shell">
+    <header class="masthead">
+      <div class="identity">
+        <strong>GHOST</strong><span>Indoor sensing</span>
+      </div>
+      <div class="header-meta"><span id="session">LOCAL SESSION</span><span id="connection" class="badge" role="status">Connecting</span></div>
+    </header>
+
+    <div class="page-layout">
+    <aside class="sidebar">
+      <p class="sidebar-title">Project overview</p>
+      <p class="sidebar-group">Demonstration</p>
+      <nav id="steps" aria-label="Presentation slides"></nav>
+      <p class="sidebar-note">HackTheBurgh 2026<br>The Nucleus, Edinburgh</p>
+    </aside>
+
+    <main class="stage">
+      <section class="story" id="overview" aria-labelledby="title">
+        <div class="panel-heading">
+          <span class="eyebrow" id="chapter">01 / 06 · INTRO</span>
+          <span id="slide-mode" class="badge" hidden></span>
+        </div>
+        <h1 id="title">Indoor sensing</h1>
+        <p id="description">A phone barometer narrows the search to one floor. A laptop listens for echoes to rank the rooms on that floor. A hand gesture turns the page.</p>
+
+        <h2 id="measurements">How the demo works</h2>
+        <div class="instrument" data-view="intro">
+          <ol class="pipeline">
+            <li><span>01</span><strong>Air pressure</strong><small>Find the floor</small></li>
+            <li><span>02</span><strong>Room echoes</strong><small>Rank the matches</small></li>
+            <li><span>03</span><strong>Wi-Fi signal</strong><small>Turn the page</small></li>
+          </ol>
+        </div>
+        <div class="instrument" data-view="floor" hidden>
+          <div class="readout"><div><small>Detected floor</small><strong id="floor-value">—</strong></div><div><small>Pressure</small><strong id="pressure-value">—</strong></div></div>
+          <div class="trace-heading"><span>Pressure trace · hPa</span><span id="pressure-mode"></span></div>
+          <svg id="pressure-trace" class="trace" viewBox="0 0 480 90" preserveAspectRatio="none" role="img" aria-label="Pressure samples over time"><polyline/></svg>
+          <p id="floor-status" class="muted"></p>
+        </div>
+        <div class="instrument" data-view="room" hidden>
+          <div class="trace-heading"><span>Impulse response · RT60 <b id="rt60">—</b></span><span id="echo-mode"></span></div>
+          <svg id="echo-trace" class="trace lilac" viewBox="0 0 480 90" preserveAspectRatio="none" role="img" aria-label="Impulse response preview"><polyline/></svg>
+          <p id="echo-details" class="muted"></p>
+          <div class="trace-heading candidate-heading"><h3>Ranked room candidates</h3><span id="room-status"></span></div>
+          <ol id="candidates" class="candidates"></ol>
+        </div>
+        <div class="instrument" data-view="model" hidden>
+          <div class="readout"><div><small>Highlighted floor</small><strong id="model-floor">—</strong></div><div><small>Top candidate</small><strong id="model-room">—</strong></div></div>
+          <p class="muted">The highlighted storey follows the floor estimate. The strongest room match is shown within that storey.</p>
+        </div>
+        <div class="instrument" data-view="gesture" hidden>
+          <div class="readout"><div><small>Motion score</small><strong id="motion-score">—</strong></div><div><small>Packet rate</small><strong id="packet-rate">—</strong></div></div>
+          <div class="trace-heading"><span>Reduced CSI trace</span><span id="wifi-mode"></span></div>
+          <svg id="wifi-trace" class="trace lilac" viewBox="0 0 480 90" preserveAspectRatio="none" role="img" aria-label="Reduced Wi-Fi CSI trace"><polyline/></svg>
+          <ol id="gesture-log" class="event-list"></ol>
+        </div>
+        <div class="instrument" data-view="results" hidden>
+          <dl class="summary"><dt>Floor estimate</dt><dd id="result-floor">—</dd><dt>Top room match</dt><dd id="result-room">—</dd><dt>Last slide trigger</dt><dd id="result-trigger">—</dd></dl>
+        </div>
+      </section>
+
+      <section class="visual" id="building-view" aria-labelledby="building-label">
+        <div class="panel-heading">
+          <h2 id="building-label">The Nucleus</h2>
+          <span id="model-mode" class="badge">Awaiting signal</span>
+        </div>
+        <figure class="building-figure">
+        <div id="building"></div>
+        <div class="legend"><span><i></i> Estimated floor</span><span><i></i> Top candidate</span><span><i></i> Inspected room</span></div>
+        <figcaption><span>Figure 1.</span> The Nucleus, five-floor study model based on the <a href="https://science-engineering.ed.ac.uk/sites/default/files/2024-05/Nucleus%20floor%20plans_0.pdf" target="_blank" rel="noopener">university floor plans</a>. Room outlines follow the PDF; building edges are simplified and heights are illustrative.</figcaption>
+        </figure>
+      </section>
+
+    <section class="controls" id="presenter-controls" aria-label="Presenter controls">
+      <div class="navigation">
+        <button id="previous" type="button" disabled>← Previous</button>
+        <button id="next" class="primary" type="button" disabled>Next →</button>
+        <span class="key-hint"><kbd>←</kbd> <kbd>→</kbd> keyboard</span>
+      </div>
+      <div class="gesture-controls">
+        <span id="gesture-status">Gesture disarmed</span>
+        <button id="arm" type="button" aria-pressed="false" disabled>Arm gesture</button>
+        <button id="simulate" type="button" hidden disabled>Simulate gesture</button>
+      </div>
+      <p id="control-error" role="alert" hidden></p>
+    </section>
+
+    <details class="events" id="events">
+      <summary><span>Hub event stream</span><span id="event-count">0 accepted</span></summary>
+      <p id="replay" class="muted" hidden></p>
+      <ol id="event-log" class="event-list"></ol>
+    </details>
+    <footer><span>HACKTHEBURGH 2026</span><span>PRESSURE / ACOUSTICS / WI-FI</span></footer>
+    </main>
+    <aside class="page-index" aria-label="On this page">
+      <p>On this page</p>
+      <a href="#overview">Overview</a>
+      <a href="#measurements" id="measurements-link">How the demo works</a>
+      <a href="#building-view">Building view</a>
+      <a href="#presenter-controls">Presenter controls</a>
+      <a href="#events">Event stream</a>
+    </aside>
+    </div>
+  </div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

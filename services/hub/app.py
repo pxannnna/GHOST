@@ -23,9 +23,10 @@ from typing import Any, Deque, Dict, List, Optional, Set, Tuple
 
 from fastapi import Body, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
-from shared.config import DATA_DIR, load_config
+from shared.config import DATA_DIR, ROOT, load_config
 from shared.schema import iso_from_unix, utc_now_iso, validate_event
 
 CFG = load_config()
@@ -140,15 +141,16 @@ class Hub:
 
     async def _on_gesture(self, r: Dict[str, Any]) -> None:
         reason = self.gesture_block_reason()
+        if reason is None and r["payload"]["gesture"] != "next":
+            reason = "unsupported gesture"
         entry = {"received_unix": r["received_unix"], "score": r["payload"]["score"],
                  "gesture": r["payload"]["gesture"], "mode": r["mode"],
                  "acted": reason is None, "ignored_reason": reason}
         self.gestures.append(entry)
-        if reason is None and r["payload"]["gesture"] == "next":
+        if reason is None:
             self.last_gesture_action = time.time()
             await self.advance(trigger=f"gesture ({r['mode']})", mode=r["mode"])
-        else:
-            await self.broadcast({"kind": "gesture_log", "entry": entry})
+        await self.broadcast({"kind": "gesture_log", "entry": entry})
 
     async def advance(self, trigger: str, mode: str = "live") -> None:
         i = VIEWS.index(self.demo["current_view"])
@@ -193,7 +195,8 @@ class Hub:
     async def broadcast(self, msg: Dict[str, Any]) -> None:
         if not self.clients:
             return
-        data = json.dumps({**msg, "server_unix": time.time()})
+        data = json.dumps({**msg, "server_unix": time.time(),
+                           "gesture_block_reason": self.gesture_block_reason()})
         dead = []
         for ws in list(self.clients):
             try:
@@ -275,3 +278,7 @@ async def ws_endpoint(ws: WebSocket) -> None:
         pass
     finally:
         HUB.clients.discard(ws)
+
+
+# Register after the API and WebSocket routes so they take precedence.
+app.mount("/", StaticFiles(directory=ROOT / "web", html=True), name="web")

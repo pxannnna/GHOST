@@ -7,8 +7,7 @@ export SESSION_ID := $(SESSION)
 hub:            ## Shangran
 	$(PY) -m uvicorn services.hub.app:app --host 127.0.0.1 --port 8000
 
-web:            ## Shangran
-	cd web && npm run dev
+web: hub        ## Shangran — the Hub also serves the demo at /
 
 mock:           ## Shangran — simulated producer for all event types
 	$(PY) -m services.mock.producer
