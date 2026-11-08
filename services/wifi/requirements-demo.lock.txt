@@ -1,0 +1,25 @@
+# Resolved Windows / Python 3.12 environment for the standalone demo.
+bitarray==3.12.3
+bitstring==4.4.0
+cffi==2.1.1
+contourpy==1.4.0
+cryptography==50.0.2
+cycler==0.12.1
+ecdsa==0.19.2
+esptool==4.13.0
+fonttools==4.68.0
+intelhex==2.3.0
+kiwisolver==1.5.1
+matplotlib==3.11.2
+numpy==2.5.4
+packaging==26.3
+pillow==13.0.0
+pycparser==3.12
+pyparsing==3.3.3
+pyserial==3.5
+python-dateutil==4.0.0
+PyYAML==6.0.3
+reedsolo==1.7.0
+six==1.17.0
+tibs==0.5.7
+tzdata==2026.6

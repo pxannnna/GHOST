@@ -1,0 +1,16 @@
+{
+  "repository": "https://github.com/espressif/esp-csi.git",
+  "commit": "8633d67152db2808f141cc1595970aa9cf406045",
+  "example": "examples/esp-radar/console_test",
+  "esp_idf": "5.5.4",
+  "components": {
+    "esp-radar": "0.3.4",
+    "esp_csi_gain_ctrl": "0.1.5",
+    "esp_radar_motion_dec": "0.1.1",
+    "led_strip": "2.5.5",
+    "cmake_utilities": "0.5.3"
+  },
+  "target": "esp32c6",
+  "protocol": 1,
+  "firmware_id": "ghost-radar-1"
+}
