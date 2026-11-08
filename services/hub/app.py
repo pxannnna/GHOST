@@ -21,11 +21,17 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Deque, Dict, List, Optional, Set, Tuple
 
+from contextlib import asynccontextmanager
+from services.wifi.live.api import router as wifi_router, controller as wifi_controller
+from services.acoustics.web_api import router as acoustic_router, controller as acoustic_controller
+from services.pressure.web_api import router as pressure_router, controller as pressure_controller
+
 from fastapi import Body, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
-from shared.config import DATA_DIR, load_config
+from shared.config import DATA_DIR, ROOT, load_config
 from shared.schema import iso_from_unix, utc_now_iso, validate_event
 
 CFG = load_config()
@@ -33,7 +39,22 @@ SESSION_ID = os.environ.get("SESSION_ID", "session-001")
 VIEWS = list(CFG["demo"]["views"])
 GESTURE_COOLDOWN_S = float(CFG["wifi"]["gesture"]["cooldown_s"])
 
-app = FastAPI(title="GHOST hub")
+@asynccontextmanager
+async def lifespan(app):
+    acoustic_controller.publisher = HUB.ingest
+    pressure_controller.publisher = HUB.ingest
+    await pressure_controller.start()
+    try:
+        yield
+    finally:
+        await acoustic_controller.shutdown()
+        await wifi_controller.shutdown()
+        await pressure_controller.shutdown()
+
+app = FastAPI(title="GHOST hub", lifespan=lifespan)
+app.include_router(wifi_router)
+app.include_router(acoustic_router)
+app.include_router(pressure_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -140,15 +161,16 @@ class Hub:
 
     async def _on_gesture(self, r: Dict[str, Any]) -> None:
         reason = self.gesture_block_reason()
+        if reason is None and r["payload"]["gesture"] != "next":
+            reason = "unsupported gesture"
         entry = {"received_unix": r["received_unix"], "score": r["payload"]["score"],
                  "gesture": r["payload"]["gesture"], "mode": r["mode"],
                  "acted": reason is None, "ignored_reason": reason}
         self.gestures.append(entry)
-        if reason is None and r["payload"]["gesture"] == "next":
+        if reason is None:
             self.last_gesture_action = time.time()
             await self.advance(trigger=f"gesture ({r['mode']})", mode=r["mode"])
-        else:
-            await self.broadcast({"kind": "gesture_log", "entry": entry})
+        await self.broadcast({"kind": "gesture_log", "entry": entry})
 
     async def advance(self, trigger: str, mode: str = "live") -> None:
         i = VIEWS.index(self.demo["current_view"])
@@ -193,7 +215,8 @@ class Hub:
     async def broadcast(self, msg: Dict[str, Any]) -> None:
         if not self.clients:
             return
-        data = json.dumps({**msg, "server_unix": time.time()})
+        data = json.dumps({**msg, "server_unix": time.time(),
+                           "gesture_block_reason": self.gesture_block_reason()})
         dead = []
         for ws in list(self.clients):
             try:
@@ -275,3 +298,7 @@ async def ws_endpoint(ws: WebSocket) -> None:
         pass
     finally:
         HUB.clients.discard(ws)
+
+
+# Register after the API and WebSocket routes so they take precedence.
+app.mount("/", StaticFiles(directory=ROOT / "web", html=True), name="web")

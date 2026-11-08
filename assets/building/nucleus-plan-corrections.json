@@ -1,0 +1,377 @@
+{
+  "coordinate_units": "PDF points, top-left origin",
+  "regions": {
+    "3/3-study-1": {
+      "polygon_pdf_points": [
+        [
+          791.51,
+          657.0
+        ],
+        [
+          793.25,
+          656.28
+        ],
+        [
+          856.73,
+          747.0
+        ],
+        [
+          851.69,
+          750.96
+        ],
+        [
+          855.05,
+          755.88
+        ],
+        [
+          664.07,
+          890.04
+        ],
+        [
+          660.35,
+          884.76
+        ],
+        [
+          654.71,
+          888.71
+        ],
+        [
+          590.33,
+          797.04
+        ],
+        [
+          597.59,
+          792.84
+        ],
+        [
+          630.59,
+          768.24
+        ],
+        [
+          630.59,
+          709.26
+        ],
+        [
+          630.59,
+          678.36
+        ],
+        [
+          631.79,
+          678.36
+        ],
+        [
+          631.79,
+          675.84
+        ],
+        [
+          763.91,
+          675.84
+        ]
+      ],
+      "holes_pdf_points": [],
+      "label": "Open study area",
+      "geometry_method": "source_vector_outline_with_approximate_shared_partition",
+      "note": "Enclosed third-floor study room removed along a shared seam. The seam follows the wall band between x=629.63 and631.79 and its diagonal continuation; wall thickness is not separately measured.",
+      "supersedes_draft_partition_warning": true
+    },
+    "3/studyroom-draft": {
+      "polygon_pdf_points": [
+        [
+          597.59,
+          792.84
+        ],
+        [
+          585.23,
+          774.96
+        ],
+        [
+          585.23,
+          711.11
+        ],
+        [
+          599.03,
+          711.11
+        ],
+        [
+          599.03,
+          708.96
+        ],
+        [
+          630.59,
+          709.26
+        ],
+        [
+          630.59,
+          768.24
+        ]
+      ],
+      "holes_pdf_points": [],
+      "geometry_method": "source_vector_outline_with_approximate_shared_partition",
+      "note": "Uses original coloured outer boundary, including small boundary steps, plus a shared partition seam [597.59,792.84]-[630.59,768.24]-[630.59,709.26]. Preserves combined plan area with the remaining open study region."
+    }
+  },
+  "floors": {
+    "1": {
+      "outline_pdf_points": [
+        [
+          194,
+          105
+        ],
+        [
+          544,
+          105
+        ],
+        [
+          544,
+          139
+        ],
+        [
+          598,
+          139
+        ],
+        [
+          598,
+          105
+        ],
+        [
+          867,
+          105
+        ],
+        [
+          867,
+          560
+        ],
+        [
+          796,
+          560
+        ],
+        [
+          796,
+          642
+        ],
+        [
+          865,
+          751
+        ],
+        [
+          665,
+          895
+        ],
+        [
+          654,
+          894
+        ],
+        [
+          585,
+          794
+        ],
+        [
+          472,
+          794
+        ],
+        [
+          472,
+          900
+        ],
+        [
+          225,
+          900
+        ],
+        [
+          225,
+          846
+        ],
+        [
+          55,
+          846
+        ],
+        [
+          55,
+          742
+        ],
+        [
+          99,
+          742
+        ],
+        [
+          99,
+          576
+        ],
+        [
+          194,
+          576
+        ]
+      ],
+      "note": "Simplified facade envelope corrected near southeast diagonal so the source coloured study polygons lie inside the floor plate. No room boundaries changed. Original small facade jogs remain simplified."
+    },
+    "2": {
+      "outline_pdf_points": [
+        [
+          194,
+          105
+        ],
+        [
+          544,
+          105
+        ],
+        [
+          544,
+          139
+        ],
+        [
+          598,
+          139
+        ],
+        [
+          598,
+          105
+        ],
+        [
+          867,
+          105
+        ],
+        [
+          867,
+          560
+        ],
+        [
+          796,
+          560
+        ],
+        [
+          796,
+          642
+        ],
+        [
+          865,
+          751
+        ],
+        [
+          665,
+          895
+        ],
+        [
+          654,
+          894
+        ],
+        [
+          585,
+          794
+        ],
+        [
+          472,
+          794
+        ],
+        [
+          472,
+          900
+        ],
+        [
+          225,
+          900
+        ],
+        [
+          225,
+          588
+        ],
+        [
+          194,
+          588
+        ]
+      ],
+      "note": "Simplified facade envelope corrected near southeast diagonal so the source coloured study polygons lie inside the floor plate. No room boundaries changed. Original small facade jogs remain simplified."
+    },
+    "3": {
+      "outline_pdf_points": [
+        [
+          194,
+          105
+        ],
+        [
+          544,
+          105
+        ],
+        [
+          544,
+          139
+        ],
+        [
+          598,
+          139
+        ],
+        [
+          598,
+          105
+        ],
+        [
+          867,
+          105
+        ],
+        [
+          867,
+          560
+        ],
+        [
+          796,
+          560
+        ],
+        [
+          796,
+          642
+        ],
+        [
+          865,
+          751
+        ],
+        [
+          665,
+          895
+        ],
+        [
+          654,
+          894
+        ],
+        [
+          585,
+          794
+        ],
+        [
+          472,
+          794
+        ],
+        [
+          472,
+          900
+        ],
+        [
+          225,
+          900
+        ],
+        [
+          225,
+          588
+        ],
+        [
+          194,
+          588
+        ]
+      ],
+      "note": "Simplified facade envelope corrected near southeast diagonal so the source coloured study polygons lie inside the floor plate. No room boundaries changed. Original small facade jogs remain simplified."
+    }
+  },
+  "validation": {
+    "checks": [
+      "Every existing coloured room polygon vertex is inside its corrected simplified floor envelope; first-floor southwest study rooms were already contained.",
+      "Third-floor partition conserves the original coloured polygon area exactly; 40,000 interior samples found no overlap or missing coverage."
+    ],
+    "third_floor_original_area_pdf_points2": 38521.9191,
+    "third_floor_room_area_pdf_points2": 3253.9944,
+    "third_floor_open_area_pdf_points2": 35267.9247,
+    "area_difference_pdf_points2": 0.0
+  },
+  "remaining_geometry_limits": [
+    "EUSA Shop main retail outline remains the draft approximate trace; southern opening boundary and ancillary-room exclusion are not independently measured.",
+    "Room geometries are coloured PDF regions, not guaranteed measured inner-wall surveys; apply the user-authorized uniform calibration without claiming tighter accuracy.",
+    "Oak and Alder span two access floors and must not be summed as independent physical rooms or volume totals. Stair/rake shapes are unmeasured."
+  ]
+}

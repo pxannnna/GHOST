@@ -1,0 +1,2026 @@
+{
+  "status": "draft_for_mapping_review_not_runtime_metric_geometry",
+  "source_plan": "https://science-engineering.ed.ac.uk/sites/default/files/2024-05/Nucleus%20floor%20plans_0.pdf",
+  "coordinate_system": {
+    "units": "PDF points",
+    "origin": "top-left",
+    "x": "right",
+    "y": "down",
+    "meters_per_pdf_point": null,
+    "note": "Direction words in provisional IDs follow page orientation; geographic north is not verified."
+  },
+  "floors": [
+    {
+      "floor_id": "LG",
+      "label": "Lower ground",
+      "estimated_elevation_m": null,
+      "estimated_floor_to_next_floor_m": null,
+      "elevation_provenance": "unknown"
+    },
+    {
+      "floor_id": "0",
+      "label": "Ground",
+      "estimated_elevation_m": 0.0,
+      "estimated_floor_to_next_floor_m": 5.96,
+      "elevation_provenance": "existing_phone_barometer_survey"
+    },
+    {
+      "floor_id": "1",
+      "label": "First",
+      "estimated_elevation_m": 5.96,
+      "estimated_floor_to_next_floor_m": 4.97,
+      "elevation_provenance": "existing_phone_barometer_survey"
+    },
+    {
+      "floor_id": "2",
+      "label": "Second",
+      "estimated_elevation_m": 10.93,
+      "estimated_floor_to_next_floor_m": 5.77,
+      "elevation_provenance": "existing_phone_barometer_survey"
+    },
+    {
+      "floor_id": "3",
+      "label": "Third",
+      "estimated_elevation_m": 16.7,
+      "estimated_floor_to_next_floor_m": null,
+      "elevation_provenance": "existing_phone_barometer_survey"
+    }
+  ],
+  "rooms": {
+    "nuc-0-elm": {
+      "label": "Elm",
+      "kind": "lecture",
+      "floor_ids": [
+        "0"
+      ],
+      "plan_region_refs": [
+        "0/elm"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 4.0,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    "nuc-0-shop": {
+      "label": "EUSA Shop",
+      "kind": "shop",
+      "floor_ids": [
+        "0"
+      ],
+      "plan_region_refs": [
+        "0/eusa-shop-draft"
+      ],
+      "mapping_status": "identity_confirmed_by_user_geometry_approximate",
+      "ceiling_height_m": 3.0,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    "nuc-0-study": {
+      "label": "Serviced study: multi-purpose",
+      "kind": "study",
+      "floor_ids": [
+        "0"
+      ],
+      "plan_region_refs": [
+        "0/g-serviced-study"
+      ],
+      "mapping_status": "identity_confirmed_by_user",
+      "ceiling_height_m": 3.0,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null,
+      "note": "User confirmed the pictured Serviced study: multi-purpose area beside the ground-floor entrance."
+    },
+    "nuc-12-oak": {
+      "label": "Oak",
+      "kind": "lecture",
+      "floor_ids": [
+        "1",
+        "2"
+      ],
+      "plan_region_refs": [
+        "1/oak",
+        "2/oak"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 5.25,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null,
+      "ceiling_min_m": 3.0,
+      "ceiling_max_m": 7.5,
+      "clearance_at_access_floor_m": {
+        "1": 7.5,
+        "2": 3.0
+      },
+      "note": "One multi-level room with two access-plan regions. 5.25 is the supplied average, not a uniform ceiling or a verified volume-equivalent height."
+    },
+    "nuc-1-larch": {
+      "label": "Larch",
+      "kind": "lecture",
+      "floor_ids": [
+        "1"
+      ],
+      "plan_region_refs": [
+        "1/larch"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 3.0,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    "nuc-1-studyroom-sw1": {
+      "label": "Southwest study room 1",
+      "kind": "study_room",
+      "floor_ids": [
+        "1"
+      ],
+      "plan_region_refs": [
+        "1/1-study-8"
+      ],
+      "mapping_status": "identity_confirmed_by_user",
+      "ceiling_height_m": 2.45,
+      "height_provenance": "user_estimate_from_another_room",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null,
+      "estimated_from": "nuc-3-studyroom",
+      "note": "User confirmed SW1 is the left room (1-study-8) and SW2 is the right room (1-study-9), relative to the displayed floor plan. Height remains estimated from nuc-3-studyroom."
+    },
+    "nuc-1-studyroom-sw2": {
+      "label": "Southwest study room 2",
+      "kind": "study_room",
+      "floor_ids": [
+        "1"
+      ],
+      "plan_region_refs": [
+        "1/1-study-9"
+      ],
+      "mapping_status": "identity_confirmed_by_user",
+      "ceiling_height_m": 2.45,
+      "height_provenance": "user_estimate_from_another_room",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null,
+      "estimated_from": "nuc-3-studyroom",
+      "note": "User confirmed SW1 is the left room (1-study-8) and SW2 is the right room (1-study-9), relative to the displayed floor plan. Height remains estimated from nuc-3-studyroom."
+    },
+    "nuc-1-studyroom-se": {
+      "label": "First-floor southeast study room",
+      "kind": "study_room",
+      "floor_ids": [
+        "1"
+      ],
+      "plan_region_refs": [
+        "1/1-study-5"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 2.45,
+      "height_provenance": "user_estimate_from_another_room",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null,
+      "estimated_from": "nuc-3-studyroom"
+    },
+    "nuc-2-yew": {
+      "label": "Yew",
+      "kind": "lecture",
+      "floor_ids": [
+        "2"
+      ],
+      "plan_region_refs": [
+        "2/yew"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 4.0,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    "nuc-2-rowan": {
+      "label": "Rowan",
+      "kind": "studio",
+      "floor_ids": [
+        "2"
+      ],
+      "plan_region_refs": [
+        "2/rowan"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 3.5,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    "nuc-2-hawthorn": {
+      "label": "Hawthorn",
+      "kind": "studio",
+      "floor_ids": [
+        "2"
+      ],
+      "plan_region_refs": [
+        "2/hawthorn"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 3.5,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    "nuc-2-studyroom-se": {
+      "label": "Second-floor southeast study room",
+      "kind": "study_room",
+      "floor_ids": [
+        "2"
+      ],
+      "plan_region_refs": [
+        "2/2-study-2"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 2.45,
+      "height_provenance": "user_estimate_from_another_room",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null,
+      "estimated_from": "nuc-3-studyroom"
+    },
+    "nuc-3-chemlab": {
+      "label": "Chemistry teaching laboratory",
+      "kind": "laboratory",
+      "floor_ids": [
+        "3"
+      ],
+      "plan_region_refs": [
+        "3/chemistry"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 2.45,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    "nuc-3-studyroom": {
+      "label": "Third-floor study room",
+      "kind": "study_room",
+      "floor_ids": [
+        "3"
+      ],
+      "plan_region_refs": [
+        "3/studyroom-draft"
+      ],
+      "mapping_status": "matched_by_plan_name_or_position",
+      "ceiling_height_m": 2.45,
+      "height_provenance": "user_provided_not_independently_verified",
+      "polygon_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    }
+  },
+  "plan_regions": {
+    "LG/alder": {
+      "floor_id": "LG",
+      "model_room_id": "alder",
+      "label": "Alder",
+      "kind": "lecture",
+      "polygon_pdf_points": [
+        [
+          530.46,
+          181.44
+        ],
+        [
+          528.35,
+          181.44
+        ],
+        [
+          528.12,
+          181.66
+        ],
+        [
+          292.31,
+          181.66
+        ],
+        [
+          292.31,
+          401.04
+        ],
+        [
+          530.75,
+          401.04
+        ],
+        [
+          530.48,
+          351.76
+        ],
+        [
+          530.63,
+          181.44
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "LG/LG-lift-1": {
+      "floor_id": "LG",
+      "model_room_id": "LG-lift-1",
+      "label": "Lift 1",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          368.03,
+          524.75
+        ],
+        [
+          401.99,
+          524.75
+        ],
+        [
+          401.99,
+          568.79
+        ],
+        [
+          368.03,
+          568.79
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "LG/LG-lift-2": {
+      "floor_id": "LG",
+      "model_room_id": "LG-lift-2",
+      "label": "Lift 2",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          406.74,
+          524.75
+        ],
+        [
+          437.58,
+          524.75
+        ],
+        [
+          437.58,
+          550.32
+        ],
+        [
+          406.74,
+          550.32
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "LG/LG-lift-3": {
+      "floor_id": "LG",
+      "model_room_id": "LG-lift-3",
+      "label": "Lift 3",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          439.62,
+          524.75
+        ],
+        [
+          470.46,
+          524.75
+        ],
+        [
+          470.46,
+          550.32
+        ],
+        [
+          439.62,
+          550.32
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "0/elm": {
+      "floor_id": "0",
+      "model_room_id": "elm",
+      "label": "Elm",
+      "kind": "lecture",
+      "polygon_pdf_points": [
+        [
+          801.95,
+          179.64
+        ],
+        [
+          622.19,
+          180.48
+        ],
+        [
+          622.31,
+          323.63
+        ],
+        [
+          608.39,
+          324.35
+        ],
+        [
+          608.39,
+          360.36
+        ],
+        [
+          612.35,
+          361.08
+        ],
+        [
+          612.47,
+          364.98
+        ],
+        [
+          612.71,
+          373.56
+        ],
+        [
+          612.88,
+          382.14
+        ],
+        [
+          612.77,
+          386.04
+        ],
+        [
+          613.79,
+          386.04
+        ],
+        [
+          613.79,
+          391.2
+        ],
+        [
+          639.71,
+          391.2
+        ],
+        [
+          639.69,
+          386.04
+        ],
+        [
+          640.67,
+          386.04
+        ],
+        [
+          640.76,
+          377.87
+        ],
+        [
+          807.94,
+          377.75
+        ],
+        [
+          807.94,
+          323.51
+        ],
+        [
+          802.37,
+          323.51
+        ],
+        [
+          802.37,
+          179.64
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "0/alder": {
+      "floor_id": "0",
+      "model_room_id": "alder",
+      "label": "Alder",
+      "kind": "lecture",
+      "polygon_pdf_points": [
+        [
+          538.74,
+          173.28
+        ],
+        [
+          536.63,
+          173.28
+        ],
+        [
+          536.39,
+          173.51
+        ],
+        [
+          289.67,
+          173.51
+        ],
+        [
+          289.67,
+          181.44
+        ],
+        [
+          289.52,
+          401.04
+        ],
+        [
+          292.31,
+          401.04
+        ],
+        [
+          292.32,
+          400.64
+        ],
+        [
+          530.75,
+          400.71
+        ],
+        [
+          530.87,
+          400.71
+        ],
+        [
+          530.75,
+          406.19
+        ],
+        [
+          538.91,
+          406.19
+        ],
+        [
+          538.75,
+          361.12
+        ],
+        [
+          538.91,
+          173.28
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "0/g-serviced-study": {
+      "floor_id": "0",
+      "model_room_id": "g-serviced-study",
+      "label": "Serviced study",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          761.03,
+          759.71
+        ],
+        [
+          723.58,
+          705.47
+        ],
+        [
+          705.37,
+          679.12
+        ],
+        [
+          751.74,
+          653.6
+        ],
+        [
+          807.95,
+          653.6
+        ],
+        [
+          807.7,
+          726.47
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "0/nucleus-cafe": {
+      "floor_id": "0",
+      "model_room_id": "nucleus-cafe",
+      "label": "Nucleus café",
+      "kind": "social",
+      "polygon_pdf_points": [
+        [
+          176.51,
+          761.19
+        ],
+        [
+          568.52,
+          761.19
+        ],
+        [
+          568.52,
+          814.15
+        ],
+        [
+          176.51,
+          814.15
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "0/0-lift-1": {
+      "floor_id": "0",
+      "model_room_id": "0-lift-1",
+      "label": "Lift 1",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          368.03,
+          524.75
+        ],
+        [
+          401.99,
+          524.75
+        ],
+        [
+          401.99,
+          568.79
+        ],
+        [
+          368.03,
+          568.79
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "0/0-lift-2": {
+      "floor_id": "0",
+      "model_room_id": "0-lift-2",
+      "label": "Lift 2",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          406.74,
+          524.75
+        ],
+        [
+          437.58,
+          524.75
+        ],
+        [
+          437.58,
+          550.32
+        ],
+        [
+          406.74,
+          550.32
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "0/0-lift-3": {
+      "floor_id": "0",
+      "model_room_id": "0-lift-3",
+      "label": "Lift 3",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          439.62,
+          524.75
+        ],
+        [
+          470.46,
+          524.75
+        ],
+        [
+          470.46,
+          550.32
+        ],
+        [
+          439.62,
+          550.32
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/larch": {
+      "floor_id": "1",
+      "model_room_id": "larch",
+      "label": "Larch",
+      "kind": "lecture",
+      "polygon_pdf_points": [
+        [
+          858.11,
+          178.91
+        ],
+        [
+          610.81,
+          178.91
+        ],
+        [
+          610.81,
+          186.84
+        ],
+        [
+          610.67,
+          406.44
+        ],
+        [
+          610.67,
+          452.64
+        ],
+        [
+          664.67,
+          452.52
+        ],
+        [
+          664.67,
+          487.2
+        ],
+        [
+          797.15,
+          487.2
+        ],
+        [
+          797.15,
+          452.52
+        ],
+        [
+          858.11,
+          452.52
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-study-1": {
+      "floor_id": "1",
+      "model_room_id": "1-study-1",
+      "label": "Study area 1",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          472.97,
+          768.18
+        ],
+        [
+          577.33,
+          768.18
+        ],
+        [
+          577.33,
+          789.67
+        ],
+        [
+          472.97,
+          789.67
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/oak": {
+      "floor_id": "1",
+      "model_room_id": "oak",
+      "label": "Oak",
+      "kind": "lecture",
+      "polygon_pdf_points": [
+        [
+          446.39,
+          182.28
+        ],
+        [
+          399.11,
+          182.28
+        ],
+        [
+          399.11,
+          178.44
+        ],
+        [
+          206.75,
+          178.44
+        ],
+        [
+          206.75,
+          399.23
+        ],
+        [
+          399.11,
+          399.23
+        ],
+        [
+          399.11,
+          395.75
+        ],
+        [
+          446.39,
+          396.0
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-study-2": {
+      "floor_id": "1",
+      "model_room_id": "1-study-2",
+      "label": "Study area 2",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          654.71,
+          493.07
+        ],
+        [
+          808.31,
+          493.07
+        ],
+        [
+          808.31,
+          530.34
+        ],
+        [
+          654.71,
+          530.34
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-study-3": {
+      "floor_id": "1",
+      "model_room_id": "1-study-3",
+      "label": "Study area 3",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          452.9,
+          192.49
+        ],
+        [
+          476.37,
+          192.49
+        ],
+        [
+          476.37,
+          387.56
+        ],
+        [
+          452.9,
+          387.56
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-study-4": {
+      "floor_id": "1",
+      "model_room_id": "1-study-4",
+      "label": "Study area 4",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          717.35,
+          663.95
+        ],
+        [
+          649.31,
+          663.95
+        ],
+        [
+          649.55,
+          633.0
+        ],
+        [
+          674.75,
+          632.76
+        ],
+        [
+          674.75,
+          621.35
+        ],
+        [
+          717.35,
+          621.35
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-study-5": {
+      "floor_id": "1",
+      "model_room_id": "1-study-5",
+      "label": "Study area 5",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          729.71,
+          621.35
+        ],
+        [
+          792.35,
+          621.35
+        ],
+        [
+          792.35,
+          628.79
+        ],
+        [
+          794.51,
+          628.79
+        ],
+        [
+          794.87,
+          641.75
+        ],
+        [
+          792.11,
+          642.11
+        ],
+        [
+          785.03,
+          647.03
+        ],
+        [
+          788.39,
+          651.83
+        ],
+        [
+          741.47,
+          683.87
+        ],
+        [
+          729.59,
+          666.0
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-study-6": {
+      "floor_id": "1",
+      "model_room_id": "1-study-6",
+      "label": "Study area 6",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          788.39,
+          651.83
+        ],
+        [
+          792.47,
+          657.59
+        ],
+        [
+          793.79,
+          656.15
+        ],
+        [
+          857.27,
+          746.87
+        ],
+        [
+          852.23,
+          750.83
+        ],
+        [
+          855.59,
+          755.75
+        ],
+        [
+          664.67,
+          889.43
+        ],
+        [
+          660.71,
+          883.79
+        ],
+        [
+          654.71,
+          887.99
+        ],
+        [
+          590.87,
+          796.91
+        ],
+        [
+          610.93,
+          782.59
+        ],
+        [
+          611.21,
+          684.48
+        ],
+        [
+          741.47,
+          683.87
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-study-7": {
+      "floor_id": "1",
+      "model_room_id": "1-study-7",
+      "label": "Study area 7",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          470.15,
+          888.47
+        ],
+        [
+          470.15,
+          887.4
+        ],
+        [
+          470.15,
+          800.03
+        ],
+        [
+          125.33,
+          799.43
+        ],
+        [
+          125.33,
+          845.39
+        ],
+        [
+          169.07,
+          845.54
+        ],
+        [
+          169.07,
+          839.39
+        ],
+        [
+          179.4,
+          839.43
+        ],
+        [
+          179.39,
+          845.39
+        ],
+        [
+          217.91,
+          845.39
+        ],
+        [
+          217.92,
+          839.28
+        ],
+        [
+          235.77,
+          839.41
+        ],
+        [
+          235.91,
+          857.63
+        ],
+        [
+          228.83,
+          857.27
+        ],
+        [
+          228.83,
+          888.47
+        ],
+        [
+          235.0,
+          888.45
+        ],
+        [
+          234.95,
+          894.59
+        ],
+        [
+          464.03,
+          894.59
+        ],
+        [
+          464.13,
+          888.07
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-study-8": {
+      "floor_id": "1",
+      "model_room_id": "1-study-8",
+      "label": "Study area 8",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          183.59,
+          746.75
+        ],
+        [
+          245.99,
+          746.75
+        ],
+        [
+          245.99,
+          788.27
+        ],
+        [
+          183.59,
+          788.27
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-study-9": {
+      "floor_id": "1",
+      "model_room_id": "1-study-9",
+      "label": "Study area 9",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          248.15,
+          746.75
+        ],
+        [
+          310.55,
+          746.75
+        ],
+        [
+          310.55,
+          788.27
+        ],
+        [
+          248.15,
+          788.27
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-lift-1": {
+      "floor_id": "1",
+      "model_room_id": "1-lift-1",
+      "label": "Lift 1",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          368.03,
+          523.32
+        ],
+        [
+          401.99,
+          523.32
+        ],
+        [
+          401.99,
+          567.36
+        ],
+        [
+          368.03,
+          567.36
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-lift-2": {
+      "floor_id": "1",
+      "model_room_id": "1-lift-2",
+      "label": "Lift 2",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          406.67,
+          523.44
+        ],
+        [
+          437.51,
+          523.44
+        ],
+        [
+          437.51,
+          549.0
+        ],
+        [
+          406.67,
+          549.0
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "1/1-lift-3": {
+      "floor_id": "1",
+      "model_room_id": "1-lift-3",
+      "label": "Lift 3",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          439.55,
+          523.43
+        ],
+        [
+          470.39,
+          523.43
+        ],
+        [
+          470.39,
+          549.0
+        ],
+        [
+          439.55,
+          549.0
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/2-study-1": {
+      "floor_id": "2",
+      "model_room_id": "2-study-1",
+      "label": "Study area 1",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          470.11,
+          726.83
+        ],
+        [
+          577.73,
+          726.83
+        ],
+        [
+          577.73,
+          748.32
+        ],
+        [
+          470.11,
+          748.32
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/oak": {
+      "floor_id": "2",
+      "model_room_id": "oak",
+      "label": "Oak",
+      "kind": "lecture",
+      "polygon_pdf_points": [
+        [
+          499.97,
+          222.24
+        ],
+        [
+          500.17,
+          182.4
+        ],
+        [
+          500.17,
+          178.56
+        ],
+        [
+          205.68,
+          178.56
+        ],
+        [
+          205.68,
+          399.36
+        ],
+        [
+          500.17,
+          399.36
+        ],
+        [
+          500.17,
+          395.88
+        ],
+        [
+          499.97,
+          355.92
+        ],
+        [
+          531.95,
+          355.92
+        ],
+        [
+          531.95,
+          222.24
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/rowan": {
+      "floor_id": "2",
+      "model_room_id": "rowan",
+      "label": "Rowan",
+      "kind": "studio",
+      "polygon_pdf_points": [
+        [
+          674.81,
+          553.2
+        ],
+        [
+          825.95,
+          553.2
+        ],
+        [
+          825.71,
+          559.67
+        ],
+        [
+          860.87,
+          559.67
+        ],
+        [
+          860.87,
+          519.59
+        ],
+        [
+          853.79,
+          519.59
+        ],
+        [
+          853.79,
+          433.92
+        ],
+        [
+          860.63,
+          433.92
+        ],
+        [
+          860.63,
+          400.92
+        ],
+        [
+          674.81,
+          401.24
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/2-study-2": {
+      "floor_id": "2",
+      "model_room_id": "2-study-2",
+      "label": "Study area 2",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          729.1,
+          621.36
+        ],
+        [
+          794.63,
+          621.59
+        ],
+        [
+          794.63,
+          642.35
+        ],
+        [
+          792.11,
+          642.35
+        ],
+        [
+          784.91,
+          647.4
+        ],
+        [
+          787.85,
+          651.96
+        ],
+        [
+          741.59,
+          684.36
+        ],
+        [
+          728.98,
+          666.0
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/2-study-3": {
+      "floor_id": "2",
+      "model_room_id": "2-study-3",
+      "label": "Study area 3",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          787.85,
+          651.96
+        ],
+        [
+          791.93,
+          657.72
+        ],
+        [
+          793.25,
+          656.28
+        ],
+        [
+          856.73,
+          747.0
+        ],
+        [
+          851.69,
+          750.96
+        ],
+        [
+          855.05,
+          755.88
+        ],
+        [
+          664.13,
+          889.56
+        ],
+        [
+          660.17,
+          883.92
+        ],
+        [
+          654.17,
+          888.12
+        ],
+        [
+          590.33,
+          797.04
+        ],
+        [
+          596.51,
+          793.12
+        ],
+        [
+          589.19,
+          782.04
+        ],
+        [
+          577.19,
+          782.04
+        ],
+        [
+          577.07,
+          731.15
+        ],
+        [
+          630.59,
+          731.15
+        ],
+        [
+          630.59,
+          684.1
+        ],
+        [
+          740.93,
+          684.0
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/hawthorn": {
+      "floor_id": "2",
+      "model_room_id": "hawthorn",
+      "label": "Hawthorn",
+      "kind": "studio",
+      "polygon_pdf_points": [
+        [
+          469.91,
+          888.11
+        ],
+        [
+          469.91,
+          887.03
+        ],
+        [
+          469.91,
+          828.0
+        ],
+        [
+          462.35,
+          828.13
+        ],
+        [
+          462.95,
+          739.92
+        ],
+        [
+          387.17,
+          739.92
+        ],
+        [
+          386.75,
+          603.48
+        ],
+        [
+          232.31,
+          603.48
+        ],
+        [
+          232.07,
+          617.52
+        ],
+        [
+          228.59,
+          617.52
+        ],
+        [
+          228.59,
+          856.92
+        ],
+        [
+          228.59,
+          888.11
+        ],
+        [
+          235.46,
+          888.23
+        ],
+        [
+          235.43,
+          894.84
+        ],
+        [
+          463.14,
+          895.08
+        ],
+        [
+          463.13,
+          888.13
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/2-study-4": {
+      "floor_id": "2",
+      "model_room_id": "2-study-4",
+      "label": "Study area 4",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          388.91,
+          603.66
+        ],
+        [
+          470.57,
+          603.66
+        ],
+        [
+          470.57,
+          699.33
+        ],
+        [
+          388.91,
+          699.33
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/yew": {
+      "floor_id": "2",
+      "model_room_id": "yew",
+      "label": "Yew",
+      "kind": "lecture",
+      "polygon_pdf_points": [
+        [
+          687.59,
+          189.36
+        ],
+        [
+          852.95,
+          189.36
+        ],
+        [
+          852.95,
+          393.6
+        ],
+        [
+          687.59,
+          393.6
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/2-study-5": {
+      "floor_id": "2",
+      "model_room_id": "2-study-5",
+      "label": "Study area 5",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          577.19,
+          600.47
+        ],
+        [
+          596.51,
+          600.47
+        ],
+        [
+          596.51,
+          699.23
+        ],
+        [
+          577.19,
+          699.23
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/2-lift-1": {
+      "floor_id": "2",
+      "model_room_id": "2-lift-1",
+      "label": "Lift 1",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          367.72,
+          523.56
+        ],
+        [
+          401.68,
+          523.56
+        ],
+        [
+          401.68,
+          567.6
+        ],
+        [
+          367.72,
+          567.6
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/2-lift-2": {
+      "floor_id": "2",
+      "model_room_id": "2-lift-2",
+      "label": "Lift 2",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          406.43,
+          523.56
+        ],
+        [
+          437.27,
+          523.56
+        ],
+        [
+          437.27,
+          549.12
+        ],
+        [
+          406.43,
+          549.12
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "2/2-lift-3": {
+      "floor_id": "2",
+      "model_room_id": "2-lift-3",
+      "label": "Lift 3",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          439.31,
+          523.55
+        ],
+        [
+          470.15,
+          523.55
+        ],
+        [
+          470.15,
+          549.12
+        ],
+        [
+          439.31,
+          549.12
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "3/chemistry": {
+      "floor_id": "3",
+      "model_room_id": "chemistry",
+      "label": "Chemistry teaching laboratory",
+      "kind": "laboratory",
+      "polygon_pdf_points": [
+        [
+          536.75,
+          145.8
+        ],
+        [
+          535.8,
+          144.12
+        ],
+        [
+          535.43,
+          114.96
+        ],
+        [
+          203.39,
+          114.96
+        ],
+        [
+          202.79,
+          400.2
+        ],
+        [
+          296.63,
+          399.93
+        ],
+        [
+          296.63,
+          395.52
+        ],
+        [
+          444.71,
+          395.4
+        ],
+        [
+          444.71,
+          400.44
+        ],
+        [
+          536.51,
+          400.2
+        ],
+        [
+          536.51,
+          246.48
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "3/3-study-1": {
+      "floor_id": "3",
+      "model_room_id": "3-study-1",
+      "label": "Study area 1",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          791.51,
+          657.0
+        ],
+        [
+          793.25,
+          656.28
+        ],
+        [
+          856.73,
+          747.0
+        ],
+        [
+          851.69,
+          750.96
+        ],
+        [
+          855.05,
+          755.88
+        ],
+        [
+          664.07,
+          890.04
+        ],
+        [
+          660.35,
+          884.76
+        ],
+        [
+          654.71,
+          888.71
+        ],
+        [
+          590.33,
+          797.04
+        ],
+        [
+          597.59,
+          792.84
+        ],
+        [
+          585.23,
+          774.96
+        ],
+        [
+          585.23,
+          711.11
+        ],
+        [
+          599.03,
+          711.11
+        ],
+        [
+          599.03,
+          708.96
+        ],
+        [
+          630.59,
+          709.26
+        ],
+        [
+          630.59,
+          678.36
+        ],
+        [
+          631.79,
+          678.36
+        ],
+        [
+          631.79,
+          675.84
+        ],
+        [
+          763.91,
+          675.84
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path",
+      "requires_partition_before_runtime_use": [
+        "3/studyroom-draft"
+      ],
+      "note": "Original coloured zone spans both open study and the enclosed room. Do not count both this full zone and the new room as disjoint spaces."
+    },
+    "3/3-study-2": {
+      "floor_id": "3",
+      "model_room_id": "3-study-2",
+      "label": "Study area 2",
+      "kind": "study",
+      "polygon_pdf_points": [
+        [
+          585.71,
+          574.5
+        ],
+        [
+          605.03,
+          574.5
+        ],
+        [
+          605.03,
+          708.96
+        ],
+        [
+          585.71,
+          708.96
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "3/3-lift-1": {
+      "floor_id": "3",
+      "model_room_id": "3-lift-1",
+      "label": "Lift 1",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          367.72,
+          523.56
+        ],
+        [
+          401.68,
+          523.56
+        ],
+        [
+          401.68,
+          567.6
+        ],
+        [
+          367.72,
+          567.6
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "3/3-lift-2": {
+      "floor_id": "3",
+      "model_room_id": "3-lift-2",
+      "label": "Lift 2",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          406.43,
+          523.56
+        ],
+        [
+          437.27,
+          523.56
+        ],
+        [
+          437.27,
+          549.12
+        ],
+        [
+          406.43,
+          549.12
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "3/3-lift-3": {
+      "floor_id": "3",
+      "model_room_id": "3-lift-3",
+      "label": "Lift 3",
+      "kind": "lift",
+      "polygon_pdf_points": [
+        [
+          439.31,
+          523.55
+        ],
+        [
+          470.15,
+          523.55
+        ],
+        [
+          470.15,
+          549.12
+        ],
+        [
+          439.31,
+          549.12
+        ]
+      ],
+      "geometry_method": "existing_pdf_coloured_vector_path"
+    },
+    "0/eusa-shop-draft": {
+      "floor_id": "0",
+      "model_room_id": null,
+      "label": "EUSA Shop",
+      "kind": "shop",
+      "polygon_pdf_points": [
+        [
+          648,
+          383
+        ],
+        [
+          807.2,
+          383
+        ],
+        [
+          807.2,
+          590.5
+        ],
+        [
+          719.5,
+          590.5
+        ],
+        [
+          719.5,
+          565.2
+        ],
+        [
+          648,
+          565.2
+        ]
+      ],
+      "geometry_method": "manual_approximate_trace",
+      "note": "Main retail space only. Southern boundary through openings is inferred; ancillary rooms and reception are excluded. Needs boundary review."
+    },
+    "3/studyroom-draft": {
+      "floor_id": "3",
+      "model_room_id": null,
+      "label": "Third-floor study room",
+      "kind": "study_room",
+      "polygon_pdf_points": [
+        [
+          585.4,
+          709.8
+        ],
+        [
+          630.5,
+          709.8
+        ],
+        [
+          630.5,
+          768.2
+        ],
+        [
+          596.2,
+          792.5
+        ],
+        [
+          585.4,
+          777.3
+        ]
+      ],
+      "geometry_method": "manual_approximate_trace",
+      "note": "Separate enclosed study room southwest of the open study area; traced from visible partition lines."
+    }
+  },
+  "regions_without_supplied_height": [
+    "0/0-lift-1",
+    "0/0-lift-2",
+    "0/0-lift-3",
+    "0/alder",
+    "0/nucleus-cafe",
+    "1/1-lift-1",
+    "1/1-lift-2",
+    "1/1-lift-3",
+    "1/1-study-1",
+    "1/1-study-2",
+    "1/1-study-3",
+    "1/1-study-4",
+    "1/1-study-6",
+    "1/1-study-7",
+    "2/2-lift-1",
+    "2/2-lift-2",
+    "2/2-lift-3",
+    "2/2-study-1",
+    "2/2-study-3",
+    "2/2-study-4",
+    "2/2-study-5",
+    "3/3-lift-1",
+    "3/3-lift-2",
+    "3/3-lift-3",
+    "3/3-study-1",
+    "3/3-study-2",
+    "LG/LG-lift-1",
+    "LG/LG-lift-2",
+    "LG/LG-lift-3",
+    "LG/alder"
+  ],
+  "pending": [
+    "Review approximate EUSA Shop extent, especially the open southern boundary.",
+    "Trim the existing third-floor open study polygon before integrating the enclosed-room polygon; avoid overlapping room volumes.",
+    "Measure a reliable horizontal reference length on each plan (or verify common scale) before deriving metric footprints, areas or volumes.",
+    "LG elevation, roof elevation and remaining room clearances are unknown; floor-to-floor intervals must not substitute for ceiling heights."
+  ],
+  "consistency_notes": [
+    "Oak entrance clearances differ by 4.5 m; the barometric floor-1-to-floor-2 estimate is 4.97 m. The 0.47 m difference is a check item, not proof of an error: ceiling shape, entrance positions and survey uncertainty are not established.",
+    "This draft covers existing coloured model regions and two traced additions; it is not a complete building room inventory."
+  ]
+}

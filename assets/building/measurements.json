@@ -1,0 +1,63 @@
+{
+ "_comment": "Measured on site, 7 Nov 2026 (floor to ceiling, metres). 'ceiling_source' says measured vs estimated. Estimated = same as a measured room of the same type, (all study rooms alike, etc.).",
+ "scale_reference": {
+  "_comment": "Plan scale from a tape-measured rectangular room (long side <-> long side). Yew's plan aspect 1.235 vs taped 1.261: consistent to 2%.",
+  "room_id": "nuc-2-yew",
+  "length_m": 14.5,
+  "width_m": 11.5,
+  "measured_on": "2026-11-07"
+ },
+ "rooms": {
+  "nuc-0-elm": {
+   "ceiling_height_m": 4.0
+  },
+  "nuc-0-shop": {
+   "ceiling_height_m": 3.0
+  },
+  "nuc-0-study": {
+   "ceiling_height_m": 3.0
+  },
+  "nuc-12-oak": {
+   "ceiling_min_m": 3.0,
+   "ceiling_max_m": 7.5,
+   "ceiling_height_m": 5.25,
+   "_note": "7.5 m at the floor-1 (bottom) entrance, 3.0 m at the floor-2 (top) entrance"
+  },
+  "nuc-1-larch": {
+   "ceiling_height_m": 3.0
+  },
+  "nuc-1-studyroom-sw1": {
+   "ceiling_height_m": 2.45,
+   "estimated_from": "nuc-3-studyroom"
+  },
+  "nuc-1-studyroom-sw2": {
+   "ceiling_height_m": 2.45,
+   "estimated_from": "nuc-3-studyroom"
+  },
+  "nuc-1-studyroom-se": {
+   "ceiling_height_m": 2.45,
+   "estimated_from": "nuc-3-studyroom"
+  },
+  "nuc-2-yew": {
+   "ceiling_height_m": 4.0,
+   "length_m": 14.5,
+   "width_m": 11.5
+  },
+  "nuc-2-rowan": {
+   "ceiling_height_m": 3.5
+  },
+  "nuc-2-hawthorn": {
+   "ceiling_height_m": 3.5
+  },
+  "nuc-2-studyroom-se": {
+   "ceiling_height_m": 2.45,
+   "estimated_from": "nuc-3-studyroom"
+  },
+  "nuc-3-chemlab": {
+   "ceiling_height_m": 2.45
+  },
+  "nuc-3-studyroom": {
+   "ceiling_height_m": 2.45
+  }
+ }
+}
