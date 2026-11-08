@@ -1,10 +1,11 @@
+import { mountPressure } from "./pressure.js?v=pressure-2";
 import { mountAcoustics } from "./acoustics.js?v=anna-20261108-auto";
 import { mountWifi } from "./wifi.js?v=study-20261108-1";
 import { mountBuilding } from "./building3d/index.js?v=study-20261108-1";
 import { sessionResult } from "./session-result.mjs";
 
 const slides = {
-  intro: ["Introduction", "Indoor sensing", "A phone barometer narrows the search to one floor. A laptop listens for echoes to rank the rooms on that floor. Wi-Fi detects movement."],
+  intro: ["Introduction", "Indoor sensing", "A USB barometer narrows the search to one floor. A laptop listens for echoes to rank the rooms on that floor. Wi-Fi detects movement."],
   floor: ["Floor detection", "Floor detection", "Air pressure falls as we go up. A calibrated reference helps choose which floor to search."],
   room: ["Room identification", "Room identification", "A speaker plays a sweep and the microphone catches the reflections. The echoes help rank the rooms on the estimated floor."],
   model: ["Building model", "Building model", "The building view marks the estimated floor and the strongest room candidate."],
@@ -43,8 +44,10 @@ let replay = null;
 let sequence = 0;
 let renderedView = null;
 let acousticState = null;
+let pressureState = null;
 let focusedResult = null;
 mountAcoustics(byId("acoustics-panel"), state => { acousticState = state; render(); });
+mountPressure(byId("pressure-panel"), state => { pressureState = state; render(); });
 const mockSession = `web-mock-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 function cap(list, size) {
@@ -123,8 +126,9 @@ function render() {
     renderedView = active;
   }
 
-  const floor = latest["floor.estimate"];
-  const pressure = latest["pressure.sample"];
+  const livePressure = pressureState?.fresh;
+  const floor = livePressure && pressureState.estimate ? {mode:'live', source:'pressure', received_unix:(Date.now()+clockOffsetMs)/1000, payload:pressureState.estimate} : null;
+  const pressure = livePressure ? {mode:'live', source:'pressure', received_unix:(Date.now()+clockOffsetMs)/1000, payload:{pressure_pa:pressureState.pressure_hpa*100}} : null;
   const echo = latest["acoustic.measurement"];
   const room = latest["room.estimate"];
   const wifi = latest["wifi.features"];
@@ -141,9 +145,9 @@ function render() {
 
   text("floor-value", floorName);
   text("pressure-value", format(pressure?.payload.pressure_pa / 100, 2, " hPa"));
-  text("pressure-mode", signalLabel(pressure));
-  text("floor-status", floor ? `Floor estimate · ${floor.payload.status}` : "Waiting for a floor estimate.");
-  trace("pressure-trace", pressureHistory.map(value => value / 100), .03);
+  text("pressure-mode", livePressure ? "live · USB barometer" : pressureState?.stage ?? "disconnected");
+  text("floor-status", floor ? `Floor estimate · ${floor.payload.status}` : pressureState?.message ?? "Connect the pressure board to begin.");
+  trace("pressure-trace", pressureState?.history_hpa ?? [], .03);
   text("model-floor", localEcho && floorId === null ? "All floors · manual search" : floorName);
   text("model-room", sameFloor ? topName : "—");
   if (localEcho) text("model-mode", "Live audio · manual floor filter");
@@ -170,7 +174,7 @@ function render() {
   text("result-snr", summary.snr);
   text("result-scope", summary.scope);
   // Pressure evidence remains independent of the manually selected acoustic floor.
-  text("result-pressure", floor?.mode === "live" ? `${floor.payload.floor_id == null ? "No floor estimate" : floorLabels[floor.payload.floor_id] ?? `Floor ${floor.payload.floor_id}`} · ${signalLabel(floor)}` : "Awaiting live pressure measurement");
+  text("result-pressure", floor?.mode === "live" ? `${floor.payload.floor_id == null ? "No floor estimate" : floorLabels[floor.payload.floor_id] ?? `Floor ${floor.payload.floor_id}`} · ${floor.payload.status} · live` : "Awaiting live pressure measurement");
   text("result-motion", summary.motion);
   text("result-note", summary.note);
   text("result-acoustic", summary.count ? `${summary.count} accepted position${summary.count === 1 ? "" : "s"} · ${summary.status}` : "Awaiting measurement");

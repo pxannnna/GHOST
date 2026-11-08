@@ -66,9 +66,10 @@
     "dwell_s": 3.0,
     "hysteresis_m": 0.6,
     "survey": {
-      "_comment": "Measured in the Nucleus on 7 Nov 2026 with the phone barometer. Absolute values drift with weather: only the deltas are reused. Re-zero at the reference floor before the demo.",
+      "_comment": "readings_hpa: measured in the Nucleus on 8 Nov 2026 with the USB barometer board, round trip G-1-2-3-2-1-G, 20 s per visit, mean of the two visits per floor (visits differed by 1.5-3.8 Pa; floors are 61-75 Pa apart). Absolute values drift with weather: only the deltas are used. Re-zero at the reference floor before the demo. relative_height_m is from the 7 Nov phone survey and is used for display and storey heights only.",
       "reference_floor": "0",
-      "readings_hpa": { "0": 1013.221, "1": 1012.506, "2": 1011.910, "3": 1011.217 },
+      "readings_hpa": { "0": 1008.696, "1": 1007.942, "2": 1007.331, "3": 1006.687 },
+      "phone_readings_hpa_7nov": { "0": 1013.221, "1": 1012.506, "2": 1011.910, "3": 1011.217 },
       "relative_height_m": { "0": 0.0, "1": 5.96, "2": 10.93, "3": 16.70 }
     }
   },

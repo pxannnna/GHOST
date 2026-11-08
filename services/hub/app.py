@@ -24,6 +24,7 @@ from typing import Any, Deque, Dict, List, Optional, Set, Tuple
 from contextlib import asynccontextmanager
 from services.wifi.live.api import router as wifi_router, controller as wifi_controller
 from services.acoustics.web_api import router as acoustic_router, controller as acoustic_controller
+from services.pressure.web_api import router as pressure_router, controller as pressure_controller
 
 from fastapi import Body, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,15 +42,18 @@ GESTURE_COOLDOWN_S = float(CFG["wifi"]["gesture"]["cooldown_s"])
 @asynccontextmanager
 async def lifespan(app):
     acoustic_controller.publisher = HUB.ingest
+    pressure_controller.publisher = HUB.ingest
     try:
         yield
     finally:
         await acoustic_controller.shutdown()
         await wifi_controller.shutdown()
+        await pressure_controller.shutdown()
 
 app = FastAPI(title="GHOST hub", lifespan=lifespan)
 app.include_router(wifi_router)
 app.include_router(acoustic_router)
+app.include_router(pressure_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
