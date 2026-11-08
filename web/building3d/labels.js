@@ -38,6 +38,11 @@ export function createLabels(viewport, model, camera, selectRoom, selectFloor) {
   layer.className = "model-labels";
   layer.setAttribute("aria-label", "Building labels");
   viewport.append(layer);
+  const leader = document.createElement("div");
+  leader.className = "model-room-leader";
+  leader.setAttribute("aria-hidden", "true");
+  leader.hidden = true;
+  layer.append(leader);
   const makeButton = (text, className, action) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -65,6 +70,7 @@ export function createLabels(viewport, model, camera, selectRoom, selectFloor) {
     render(selected, estimate) {
       const width = viewport.clientWidth, height = viewport.clientHeight;
       const occupied = [];
+      leader.hidden = true;
       floorLabels.forEach(entry => { entry.button.hidden = !entry.floor.group.visible; });
       const projectedFloors = floorLabels.filter(entry => entry.floor.group.visible).map(entry => {
         const anchor = new THREE.Vector3(0, 1, 0);
@@ -98,8 +104,42 @@ export function createLabels(viewport, model, camera, selectRoom, selectFloor) {
         const obstruction = ray.intersectObjects(meshes, false)[0];
         if (obstruction && obstruction.distance < distance-.15) continue;
         button.hidden = false;
-        const box = { x:(projected.x+1)*width/2-button.offsetWidth/2,
+        let box = { x:(projected.x+1)*width/2-button.offsetWidth/2,
           y:(1-projected.y)*height/2-button.offsetHeight/2, w:button.offsetWidth, h:button.offsetHeight };
+        if (key === selected) {
+          // Keep both the selected label and neighbouring labels off the room.
+          // A callout points to its footprint instead of covering its small walls.
+          const part = model.roomParts.get(key);
+          const bounds = new THREE.Box3().setFromObject(part.walls.children.length ? part.walls : zone);
+          const points = [];
+          for (const x of [bounds.min.x,bounds.max.x]) for (const y of [bounds.min.y,bounds.max.y]) for (const z of [bounds.min.z,bounds.max.z]) {
+            const p = new THREE.Vector3(x,y,z).project(camera);
+            points.push({x:(p.x+1)*width/2,y:(1-p.y)*height/2});
+          }
+          const left = Math.min(...points.map(p=>p.x)), right = Math.max(...points.map(p=>p.x));
+          const top = Math.min(...points.map(p=>p.y)), bottom = Math.max(...points.map(p=>p.y));
+          const roomBox = {x:left-8,y:top-8,w:right-left+16,h:bottom-top+16};
+          occupied.push(roomBox);
+          const choices = [
+            {x:right+28,y:(top+bottom-box.h)/2},
+            {x:left-box.w-28,y:(top+bottom-box.h)/2},
+            {x:(left+right-box.w)/2,y:top-box.h-28},
+            {x:(left+right-box.w)/2,y:bottom+28},
+          ].map(p=>({...box,...p}));
+          const placement = choices.find(p=>p.x>=2 && p.y>=2 && p.x+p.w<=width-2 && p.y+p.h<=height-2 && !occupied.some(other=>overlaps(p,other)));
+          if (placement) {
+            box = placement;
+            const floorPoint = entry.anchor.clone();
+            floorPoint.y = zone.position.y+.03;
+            zone.parent.localToWorld(floorPoint).project(camera);
+            const ax = (floorPoint.x+1)*width/2, ay = (1-floorPoint.y)*height/2;
+            const bx = Math.max(box.x,Math.min(box.x+box.w,ax));
+            const by = Math.max(box.y,Math.min(box.y+box.h,ay));
+            leader.style.width = `${Math.hypot(bx-ax,by-ay)}px`;
+            leader.style.transform = `translate(${ax}px, ${ay}px) rotate(${Math.atan2(by-ay,bx-ax)}rad)`;
+            leader.hidden = false;
+          }
+        }
         if (box.x<2 || box.y<2 || box.x+box.w>width-2 || box.y+box.h>height-2 || occupied.some(other=>overlaps(box,other))) {
           button.hidden = true;
           continue;

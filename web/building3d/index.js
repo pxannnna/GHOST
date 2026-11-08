@@ -4,7 +4,7 @@ import data from "./nucleus-metric-data.js";
 import { createBuilding, zoneColours } from "./geometry.js";
 import { updateArchitecture } from "./architecture.js";
 import { applyRoomFocus } from "./room-focus.js";
-import { createLabels, roomKey, visibleMeshes } from "./labels.js";
+import { createLabels, roomKey, visibleMeshes } from "./labels.js?v=red-room-1";
 
 export function mountBuilding(container) {
   const root = document.createElement("div");
@@ -85,8 +85,8 @@ export function mountBuilding(container) {
   let cutaway = false;
   let focusFloor = null;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const pulseLow = new THREE.Color(0xf1d9ae);
-  const pulseHigh = new THREE.Color(0xe3aa46);
+  const pulseLow = new THREE.Color(0xffb3b3);
+  const pulseHigh = new THREE.Color(0xe02030);
   let pulseFrame = null;
   let pulseRoom = "";
   let pulseStart = 0;
@@ -98,13 +98,13 @@ export function mountBuilding(container) {
     part.zone.material.color.copy(pulseLow).lerp(pulseHigh,strength);
     part.zone.traverse(object => {
       if (object.isLineSegments) {
-        object.material.color.setHex(0xb87828);
+        object.material.color.setHex(0xb51224);
         object.material.transparent = true;
         object.material.opacity = .6+.4*strength;
       }
     });
     part.walls.traverse(object => {
-      if (object.isMesh) object.material.opacity = .24+.30*strength;
+      if (object.isMesh) object.material.opacity = .22+.43*strength;
       else if (object.isLineSegments) object.material.opacity = .55+.45*strength;
     });
   }
@@ -196,16 +196,16 @@ export function mountBuilding(container) {
     if (focusFloor) {
       applyRoomFocus(model, focusFloor);
       const room = model.zones.find(zone=>roomKey(zone)===inspected)?.userData;
-      root.querySelector(".model-layout-note").textContent = `${room?.label ?? "Room"} · Floor ${focusFloor === "0" ? "G" : focusFloor}. Upper floors and ceiling removed. Translucent 3D room walls remain; the selected room is highlighted in amber.`;
+      root.querySelector(".model-layout-note").textContent = `${room?.label ?? "Room"} · Floor ${focusFloor === "0" ? "G" : focusFloor}. Upper floors and ceiling removed. Translucent 3D room walls remain; the selected room is highlighted in red.`;
     }
     for (const [key, part] of model.roomParts) {
       const selected = Boolean(focusFloor) && key === inspected;
       part.walls.traverse(object => {
         if (object.isMesh) {
-          object.material.color.setHex(selected ? 0xd6a45c : 0xc7d2df);
+          object.material.color.setHex(selected ? 0xe02030 : 0xc7d2df);
           object.material.opacity = selected ? .38 : focusFloor ? .20 : part.zone.userData.kind === "study" ? .12 : .48;
         } else if (object.isLineSegments) {
-          object.material.color.setHex(selected ? 0xa36a25 : 0x9baabd);
+          object.material.color.setHex(selected ? 0xb51224 : 0x9baabd);
           object.material.opacity = selected ? .95 : focusFloor ? .45 : .7;
         }
       });
@@ -216,7 +216,7 @@ export function mountBuilding(container) {
       const rank = eligible && !focusFloor ? (ranks.get(zone.userData.room_id) ?? ranks.get(zone.userData.legacy_room_id)) : undefined;
       let colour = zoneColours[zone.userData.kind];
       if (rank !== undefined) colour = rank === 0 ? 0x5659da : 0xa2aee5;
-      if (selected) colour = focusFloor ? 0xe8c68d : 0xd79b46;
+      if (selected) colour = 0xe02030;
       zone.material.color.setHex(colour);
       zone.traverse(object => {
         if (object.isLineSegments) {

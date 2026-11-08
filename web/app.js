@@ -2,7 +2,7 @@ import { modelPresentation } from "./model-presentation.mjs?v=1";
 import { mountPressure } from "./pressure.js?v=pressure-auto-3";
 import { mountAcoustics } from "./acoustics.js?v=anna-20261108-auto";
 import { mountWifi } from "./wifi.js?v=study-20261108-1";
-import { mountBuilding } from "./building3d/index.js?v=auto-model-1";
+import { mountBuilding } from "./building3d/index.js?v=red-room-1";
 import { sessionResult } from "./session-result.mjs";
 
 const slides = {

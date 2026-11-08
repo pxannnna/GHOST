@@ -109,9 +109,11 @@ small, .muted { color: var(--muted); }
 .model-labels .model-floor-label { font-weight: 600; color: #454956; background: #f3f5f9f5; border-left: 3px solid #9ca7b8; max-width: 108px; }
 .model-labels .model-floor-label[data-estimated="true"] { border-left-color: var(--blue); color: #3939b0; }
 .model-labels button:hover { border-color: var(--blue); }
-.model-labels button[aria-pressed="true"] { background: #fff3df; border-color: #b67a25; color: #754b12; }
+.model-labels button[aria-pressed="true"] { background: #fff1f2; border-color: #dc2638; color: #a51022; font-weight: 600; }
+.model-room-leader { position: absolute; top: 0; left: 0; height: 1px; background: #c91c30; transform-origin: 0 50%; pointer-events: none; }
+.model-room-leader::before { content: ""; position: absolute; left: -3px; top: -2px; width: 6px; height: 6px; border-radius: 50%; background: #c91c30; }
 .model-labels button:focus-visible, .model-clear:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-.model-room-info { margin: 12px 0; padding: 14px 16px; border: 1px solid #e5d6bd; border-left: 3px solid #d79b46; border-radius: 3px; background: #fffdf9; }
+.model-room-info { margin: 12px 0; padding: 14px 16px; border: 1px solid #efd6d9; border-left: 3px solid #dc2638; border-radius: 3px; background: #fffafa; }
 .model-room-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
 .model-room-heading h3 { font-size: 16px; }
 .model-clear { padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 12px; text-decoration: underline; }
@@ -127,7 +129,7 @@ small, .muted { color: var(--muted); }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 12px; padding: 14px 0; }
 .legend i { display: inline-block; width: 9px; height: 9px; border: 1px solid #6a84ba; background: #e1e8f7; margin-right: 4px; }
 .legend span:nth-child(2) i { border-color: #3436b0; background: #5557d8; }
-.legend span:nth-child(3) i { border-color: #a56e2d; background: #d79b46; }
+.legend span:nth-child(3) i { border-color: #b51224; background: #e02030; }
 figcaption { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding: 14px 0; }
 figcaption span { color: var(--blue); }
 .controls { padding-top: 22px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 18px; }
