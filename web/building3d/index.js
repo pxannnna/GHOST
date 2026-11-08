@@ -53,7 +53,7 @@ export function mountBuilding(container) {
   } catch {
     viewport.textContent = "3D graphics are unavailable in this browser. Open the linked source floor plans to view the building.";
     root.querySelectorAll("select, input, button").forEach(control => { control.disabled = true; });
-    return { setFloor() {}, setRoomCandidates() {}, setMode() {}, focusRoom() {}, dispose() { root.remove(); } };
+    return { setFloor() {}, setRoomCandidates() {}, setMode() {}, focusRoom() {}, setPresentation() {}, dispose() { root.remove(); } };
   }
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setClearColor(0xfafbfd);
@@ -72,6 +72,9 @@ export function mountBuilding(container) {
   controls.minDistance = 8;
   controls.maxDistance = 350;
   controls.maxPolarAngle = Math.PI / 2 - .03;
+  let editable = true;
+  let presentationKey = null;
+  let manualView = null;
   let estimate = null;
   let candidates = [];
   let candidateMode = "";
@@ -123,7 +126,7 @@ export function mountBuilding(container) {
   }
   document.addEventListener("visibilitychange",syncPulse);
   reducedMotion.addEventListener("change",syncPulse);
-  const labels = createLabels(viewport, model, camera, selectRoom, selectFloor);
+  const labels = createLabels(viewport, model, camera, key => { if (editable) selectRoom(key); }, id => { if (editable) selectFloor(id); });
   const render = () => {
     if (disposed) return;
     for (const floor of model.floors.values()) {
@@ -268,6 +271,7 @@ export function mountBuilding(container) {
         (zone.userData.room_id === candidate.room_id || zone.userData.legacy_room_id === candidate.room_id) && zone.userData.floorId === estimate));
       detail.textContent = `Estimated floor · ${floorLabel}${mode ? " · " + mode : ""}${unknown.length ? " · Unmapped room IDs: " + unknown.map(room => room.room_id).join(", ") : ""}`;
     }
+    root.querySelectorAll(".model-labels button").forEach(button => { button.disabled = !editable; });
     syncPulse();
     render();
   }
@@ -346,15 +350,18 @@ export function mountBuilding(container) {
   let pressed = null;
   const pointers = new Set();
   canvas.addEventListener("pointerdown", event => {
+    if (!editable) return;
     pointers.add(event.pointerId);
     pressed = pointers.size === 1 && event.button === 0
       ? {id:event.pointerId, x:event.clientX, y:event.clientY, dragged:false} : null;
   });
   canvas.addEventListener("pointermove", event => {
+    if (!editable) return;
     if (pressed && Math.hypot(event.clientX-pressed.x,event.clientY-pressed.y)>5) pressed.dragged = true;
     canvas.style.cursor = pointers.size ? "grabbing" : hitRoom(event) ? "pointer" : "grab";
   });
   canvas.addEventListener("pointerup", event => {
+    if (!editable) return;
     if (pressed?.id === event.pointerId && !pressed.dragged && pointers.size === 1 &&
         Math.hypot(event.clientX-pressed.x,event.clientY-pressed.y)<=5) selectRoom(hitRoom(event));
     pointers.delete(event.pointerId);
@@ -370,12 +377,44 @@ export function mountBuilding(container) {
     renderer.setSize(width, height);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    frameView();
+    if (editable && manualView) render();
+    else frameView();
   });
   observer.observe(viewport);
   update();
   frameView();
   return {
+    setPresentation(next) {
+      const key = JSON.stringify(next);
+      if (key === presentationKey) return;
+      presentationKey = key;
+      if (editable && !next.editable) {
+        manualView = {floor:floorSelect.value, view:viewSelect.value, display:displaySelect.value,
+          spacing:spacing.value, inspected, position:camera.position.clone(), target:controls.target.clone()};
+      }
+      const enteringManual = !editable && next.editable;
+      editable = next.editable;
+      controls.enabled = editable;
+      root.dataset.presentation = editable ? 'manual' : 'automatic';
+      canvas.style.cursor = editable ? 'grab' : 'default';
+      if (editable) {
+        if (enteringManual && manualView) {
+          floorSelect.value = manualView.floor; viewSelect.value = manualView.view;
+          displaySelect.value = manualView.display; spacing.value = manualView.spacing;
+          inspected = manualView.inspected; roomSelect.value = inspected;
+          camera.position.copy(manualView.position); controls.target.copy(manualView.target);
+          controls.enableRotate = viewSelect.value !== 'plan';
+          update(); controls.update(); render();
+        }
+        return;
+      }
+      inspected = next.roomKey && model.roomParts.has(next.roomKey) ? next.roomKey : '';
+      roomSelect.value = inspected;
+      floorSelect.value = inspected ? 'all' : model.floors.has(next.floorId) ? next.floorId : 'all';
+      displaySelect.value = inspected ? 'room' : floorSelect.value === 'all' ? 'exterior' : 'cutaway';
+      viewSelect.value = '3d'; spacing.value = '0';
+      update(); frameView();
+    },
     focusRoom(key) {
       if (key && !model.roomParts.has(key)) return;
       if (inspected === key) return;

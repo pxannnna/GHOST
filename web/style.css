@@ -184,3 +184,9 @@ footer { display: flex; justify-content: space-between; gap: 12px; padding-top: 
   #gesture-status { width: 100%; }
   footer { flex-wrap: wrap; }
 }
+
+.building-model[data-presentation="automatic"] .model-toolbar,
+.building-model[data-presentation="automatic"] .model-clear,
+.building-model[data-presentation="automatic"] .model-note,
+.building-model[data-presentation="automatic"] .model-layout-note { display:none; }
+.building-model[data-presentation="automatic"] .model-labels button { cursor:default; pointer-events:none; opacity:1; }

@@ -1,7 +1,8 @@
+import { modelPresentation } from "./model-presentation.mjs?v=1";
 import { mountPressure } from "./pressure.js?v=pressure-auto-3";
 import { mountAcoustics } from "./acoustics.js?v=anna-20261108-auto";
 import { mountWifi } from "./wifi.js?v=study-20261108-1";
-import { mountBuilding } from "./building3d/index.js?v=study-20261108-1";
+import { mountBuilding } from "./building3d/index.js?v=auto-model-1";
 import { sessionResult } from "./session-result.mjs";
 
 const slides = {
@@ -45,7 +46,6 @@ let sequence = 0;
 let renderedView = null;
 let acousticState = null;
 let pressureState = null;
-let focusedResult = null;
 mountAcoustics(byId("acoustics-panel"), state => { acousticState = state; render(); });
 mountPressure(byId("pressure-panel"), state => { pressureState = state; render(); });
 const mockSession = `web-mock-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -153,7 +153,7 @@ function render() {
   if (localEcho) text("model-mode", "Live audio · manual floor filter");
   else badge("model-mode", floor);
   building?.setFloor(floorId);
-  building?.setRoomCandidates(sameFloor && floorId !== null && (!localEcho || acousticState.result?.status !== "no_match") ? candidates : [], localEcho ? "live" : room?.mode);
+  building?.setRoomCandidates(localEcho && sameFloor && floorId !== null && (!localEcho || acousticState.result?.status !== "no_match") ? candidates : [], localEcho ? "live" : room?.mode);
   if (localEcho) building?.setMode("live");
   else if (floor) building?.setMode(floor.mode);
 
@@ -178,9 +178,9 @@ function render() {
   text("result-motion", summary.motion);
   text("result-note", summary.note);
   text("result-acoustic", summary.count ? `${summary.count} accepted position${summary.count === 1 ? "" : "s"} · ${summary.status}` : "Awaiting measurement");
-  const focusKey = active === "results" && summary.top && summary.floor != null ? `${summary.floor}/${summary.top.room_id}` : null;
-  if (active === "results" && focusKey !== focusedResult) building?.focusRoom(focusKey ?? "");
-  focusedResult = focusKey;
+  building?.setPresentation(modelPresentation(active, pressureState, acousticState));
+  if (active === 'floor') text('model-mode', floor?.payload.status === 'settled' ? 'Detected floor · live' : 'Awaiting stable floor measurement');
+  if (active === 'room') text('model-mode', summary.top ? `${summary.status} · ${summary.title}` : 'Awaiting room measurement');
   if (active === "results") text("model-mode", summary.top ? "Acoustic result" : "Awaiting acoustic result");
 
   const progress = byId("replay");
@@ -222,7 +222,6 @@ function receive(message) {
     floorLabels = Object.fromEntries(floors.map(floor => [floor.id, floor.label]));
     building?.dispose();
     building = mountBuilding(byId("building"), { floors });
-    focusedResult = null;
     text("building-label", demo.selected_building ?? state.config.building.label);
     text("session", state.session_id);
     byId("steps").replaceChildren(...views.map((id, index) => {
