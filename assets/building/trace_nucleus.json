@@ -1,0 +1,47 @@
+{
+  "_comment": "Enclosed rooms only (no corridors, atrium, café, open study zones, plant or staff rooms): GHOST locates you inside a ROOM. Outlines are the coloured room fills of the University's 'Nucleus floor plans' PDF, in PDF points (x right, y DOWN); all pages share one frame. build_rooms.py converts to metres. Ceiling heights live in measurements.json. LG (and Alder, the LG theatre) is off limits and not modelled.",
+  "source": {
+    "title": "Nucleus floor plans, The University of Edinburgh",
+    "url": "https://science-engineering.ed.ac.uk/sites/default/files/2024-05/Nucleus%20floor%20plans_0.pdf",
+    "retrieved": "2026-11-07",
+    "pages": {"0": 2, "1": 3, "2": 4, "3": 5},
+    "also_used": "Nucleus Sensory Map (https://science-engineering.ed.ac.uk/sites/default/files/2025-05/Nucleus%20Sensory%20Map.pdf) for the first scale estimate"
+  },
+  "origin_pt": [190, 900],
+  "default_scale_m_per_pt": 0.0775,
+  "_scale_comment": "Fallback only. The real scale comes from measurements.json scale_reference (Yew taped 14.5 x 11.5 m -> 0.0703 m/pt).",
+  "rooms": [
+    {"room_id": "nuc-0-elm", "label": "Elm Lecture Theatre (G.02)", "floor_ids": ["0"], "kind": "lecture_theatre", "seats": 140,
+     "polygon_pt": [[801.9,179.6],[622.2,180.5],[622.3,323.6],[608.4,324.4],[608.4,360.4],[612.3,361.1],[612.8,386.0],[640.7,386.0],[640.8,377.9],[807.9,377.8],[807.9,323.5],[802.4,323.5]]},
+    {"room_id": "nuc-0-shop", "label": "EUSA Shop", "floor_ids": ["0"], "kind": "retail", "approximate_outline": true,
+     "polygon_pt": [[645,383],[808,383],[808,560],[645,560]]},
+    {"room_id": "nuc-0-study", "label": "Serviced study (multi-purpose)", "floor_ids": ["0"], "kind": "study_room",
+     "polygon_pt": [[761.0,759.7],[723.6,705.5],[705.4,679.1],[751.7,653.6],[808.0,653.6],[807.7,726.5]]},
+
+    {"room_id": "nuc-12-oak", "label": "Oak Lecture Theatre (1.14)", "floor_ids": ["1", "2"], "kind": "lecture_theatre", "seats": 400,
+     "note": "fixed rake spanning floors 1-2; entered at the bottom from floor 1 and at the top from floor 2",
+     "polygon_pt": [[500.0,222.2],[500.2,178.6],[205.7,178.6],[205.7,399.4],[500.2,399.4],[500.0,355.9],[532.0,355.9],[532.0,222.2]]},
+    {"room_id": "nuc-1-larch", "label": "Larch Lecture Theatre (1.15)", "floor_ids": ["1"], "kind": "lecture_theatre", "seats": 300,
+     "polygon_pt": [[858.1,178.9],[610.8,178.9],[610.7,452.6],[664.7,452.5],[664.7,487.2],[797.1,487.2],[797.1,452.5],[858.1,452.5]]},
+    {"room_id": "nuc-1-studyroom-sw1", "label": "Study room, 1st floor south-west (left)", "floor_ids": ["1"], "kind": "study_room",
+     "polygon_pt": [[183.6,746.8],[246.0,746.8],[246.0,788.3],[183.6,788.3]]},
+    {"room_id": "nuc-1-studyroom-sw2", "label": "Study room, 1st floor south-west (right)", "floor_ids": ["1"], "kind": "study_room",
+     "polygon_pt": [[248.1,746.8],[310.5,746.8],[310.5,788.3],[248.1,788.3]]},
+    {"room_id": "nuc-1-studyroom-se", "label": "Study room, 1st floor south-east", "floor_ids": ["1"], "kind": "study_room",
+     "polygon_pt": [[729.7,621.4],[794.5,621.4],[794.9,641.8],[785.0,647.0],[788.4,651.8],[741.5,683.9],[729.6,666.0]]},
+
+    {"room_id": "nuc-2-yew", "label": "Yew Lecture Theatre (2.07)", "floor_ids": ["2"], "kind": "lecture_theatre", "seats": 150,
+     "polygon_pt": [[687.6,189.4],[853.0,189.4],[853.0,393.6],[687.6,393.6]]},
+    {"room_id": "nuc-2-rowan", "label": "Rowan Studio Classroom (2.06)", "floor_ids": ["2"], "kind": "studio", "seats": 60,
+     "polygon_pt": [[674.8,553.2],[826.0,553.2],[825.7,559.7],[860.9,559.7],[860.9,519.6],[853.8,519.6],[853.8,433.9],[860.6,433.9],[860.6,400.9],[674.8,401.2]]},
+    {"room_id": "nuc-2-hawthorn", "label": "Hawthorn Studio Classroom (2.03)", "floor_ids": ["2"], "kind": "studio", "seats": 132,
+     "polygon_pt": [[469.9,888.1],[469.9,828.0],[462.4,828.1],[463.0,739.9],[387.2,739.9],[386.8,603.5],[232.3,603.5],[232.1,617.5],[228.6,617.5],[228.6,888.1],[235.4,894.8],[463.1,895.1]]},
+    {"room_id": "nuc-2-studyroom-se", "label": "Study room, 2nd floor south-east", "floor_ids": ["2"], "kind": "study_room",
+     "polygon_pt": [[729.1,621.4],[794.6,621.6],[794.6,642.4],[784.9,647.4],[787.8,652.0],[741.6,684.4],[729.0,666.0]]},
+
+    {"room_id": "nuc-3-chemlab", "label": "Chemistry teaching laboratory", "floor_ids": ["3"], "kind": "lab",
+     "polygon_pt": [[536.8,145.8],[535.4,115.0],[203.4,115.0],[202.8,400.2],[296.6,399.9],[296.6,395.5],[444.7,395.4],[444.7,400.4],[536.5,400.2]]},
+    {"room_id": "nuc-3-studyroom", "label": "Study room, 3rd floor", "floor_ids": ["3"], "kind": "study_room", "approximate_outline": true,
+     "polygon_pt": [[585.2,711.1],[630.6,709.3],[630.6,772.0],[597.6,792.8],[585.2,775.0]]}
+  ]
+}
