@@ -40,28 +40,26 @@ def test_stale_readings_cannot_keep_a_floor_result_or_allow_calibration():
     assert not c.snapshot()['can_calibrate']
 
 
-def test_calibration_requires_fresh_stable_samples_and_uses_board_survey():
-    async def scenario():
-        c = api.PressureController()
-        with pytest.raises(ValueError):
-            await c.calibrate('3')
-        c.stage = 'connected'; c.last_at = time.monotonic()
-        for i in range(16): c.estimator.update(i*.2, 100661.7)
-        await c.calibrate('3')
-        assert c.calibration_floor == '3'
-        assert c.estimator.delta_pa['3'] == pytest.approx(200.9)
-        assert c.estimator.update(3.2, 100661.7).floor_id == '3'
-        c.estimator.window.append((3.4, 100671.7))
-        with pytest.raises(ValueError): await c.calibrate('3')
-        await c.close()
-        assert c.snapshot()['estimate'] is None
-        assert c.estimator.p_ref_pa is None
-    asyncio.run(scenario())
+def test_auto_calibration_waits_for_stable_samples_and_does_not_force_floor_result():
+    c = api.PressureController()
+    assert not c.ready_to_zero()
+    c.stage = 'connected'; c.last_at = time.monotonic()
+    for i in range(16): c.estimator.update(i*.2, 100661.7)
+    assert c.ready_to_zero(100661.7)
+    assert not c.ready_to_zero(100671.7)
+    c.zero_on_third_floor()
+    assert c.calibration_floor == '3'
+    assert c.estimator.delta_pa['3'] == pytest.approx(200.9)
+    assert c.estimator.update(3.2, 100661.7).floor_id == '3'
+    # The starting baseline is fixed, not all subsequent floor estimates.
+    for i in range(50): result = c.estimator.update(3.4 + i*.2, 100726.1)
+    assert result.floor_id == '2'
+    assert result.status == 'settled'
 
 
-def test_worker_reconnects_on_changed_com_port_and_requires_new_calibration(monkeypatch):
+def test_startup_waits_for_board_and_automatically_recalibrates_after_com_change(monkeypatch):
     async def scenario():
-        current_ports = [port()]
+        current_ports = []
         monkeypatch.setattr(api, 'devices', lambda: current_ports)
         instances = []
         class FakeBoard:
@@ -85,15 +83,19 @@ def test_worker_reconnects_on_changed_com_port_and_requires_new_calibration(monk
                 await asyncio.sleep(.01)
             raise AssertionError('Timed out waiting for worker state')
         try:
-            await c.connect(None)
-            await until(lambda: c.snapshot()['can_calibrate'])
-            await c.calibrate('3')
+            await c.start()
+            await until(lambda: c.stage == 'reconnecting')
+            assert not instances
+            current_ports[:] = [port()]
+            await until(lambda: c.calibration_floor == '3')
             current_ports[:] = [port('COM12')]
             instances[0].fail = True
             await until(lambda: len(instances) == 2 and c.stage == 'connected')
             assert c.port == 'COM12'
             assert c.calibration_floor is None
             assert instances[0].closed
+            await until(lambda: c.calibration_floor == '3')
+            assert c.snapshot()['estimate']['floor_id'] == '3'
         finally:
             await c.shutdown()
         assert instances[-1].closed

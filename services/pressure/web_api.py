@@ -5,7 +5,6 @@ import time
 import uuid
 from collections import deque
 from dataclasses import asdict
-from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -50,11 +49,12 @@ class PressureController:
         self.publisher = None
         self.session_id = 'web-pressure-' + uuid.uuid4().hex[:12]
         self.sequence = 0
+        self.fallback_port = None
         self.requested = None
         self.identity = None
         self.port = None
         self.stage = 'disconnected'
-        self.message = 'Connect the barometer, then calibrate on your current floor.'
+        self.message = 'Waiting for the barometer. Startup calibration uses floor 3.'
         self.history = deque(maxlen=300)
         self.last_at = None
         self.pressure = None
@@ -79,7 +79,7 @@ class PressureController:
                 'estimate': self.estimate if fresh else None, 'history_hpa': list(self.history),
                 'calibration_floor': self.calibration_floor,
                 'can_calibrate': fresh and len(self.estimator.window) >= 10
-                and self.estimator.window[-1][0] - self.estimator.window[0][0] >= 2.4}
+                and self.estimator.window[-1][0] - self.estimator.window[0][0] >= 2.8}
 
     async def emit(self, kind, payload):
         if self.publisher:
@@ -90,6 +90,18 @@ class PressureController:
 
     async def status(self, state):
         await self.emit('source.status', {'component': 'barometer', 'state': state, 'detail': self.message})
+
+    async def start(self):
+        """Wait for a board even when USB is plugged in after server startup."""
+        async with self.lock:
+            if self.task and not self.task.done():
+                return
+            self.stop = asyncio.Event()
+            self.identity = None
+            self.fallback_port = None
+            self.requested = None
+            self.stage, self.message = 'connecting', 'Looking for the pressure board…'
+            self.task = asyncio.create_task(self.run())
 
     async def connect(self, requested):
         async with self.lock:
@@ -112,6 +124,9 @@ class PressureController:
             client = None
             try:
                 device = select_device(await asyncio.to_thread(devices), self.fallback_port, self.identity)
+                if self.identity is None and device['serial_number']:
+                    self.identity = (device['vid'], device['pid'], device['serial_number'])
+                self.fallback_port = device['port']
                 self.port = device['port']
                 client = BoardClient(self.port, rate_hz=5)
                 await self.status('starting')
@@ -120,7 +135,7 @@ class PressureController:
                     break
                 self.reset_estimator()
                 self.history.clear()
-                self.stage, self.message = 'connected', 'Receiving pressure. Calibrate on your current floor.'
+                self.stage, self.message = 'connected', 'Calibrating automatically on floor 3. Keep the board still…'
                 await self.status('calibrating')
                 previous_time = None
                 while not self.stop.is_set():
@@ -137,6 +152,9 @@ class PressureController:
                     previous_time = bt
                     self.pressure, self.temperature, self.last_at = hpa, temp, time.monotonic()
                     self.history.append(hpa)
+                    if self.calibration_floor is None and self.ready_to_zero(hpa * 100):
+                        self.zero_on_third_floor()
+                        await self.status('ok')
                     self.estimate = asdict(self.estimator.update(bt, hpa * 100))
                     await self.emit('pressure.sample', {'pressure_pa': hpa * 100, 'sensor_timestamp': bt,
                                     'relative_height_m': self.estimate['relative_height_m']})
@@ -155,19 +173,18 @@ class PressureController:
                 except asyncio.TimeoutError:
                     pass
 
-    async def calibrate(self, floor):
-        async with self.lock:
-            if not self.snapshot()['can_calibrate']:
-                raise ValueError('Wait for at least 3 seconds of fresh pressure readings.')
-            # Calibrate only from a quiet, stationary window (roughly < 0.5 m spread).
-            values = [p for _, p in self.estimator.window]
-            if max(values) - min(values) > 6:
-                raise ValueError('Pressure is changing. Keep the board still and try again.')
-            self.estimator.zero_from_window(floor)
-            self.calibration_floor = floor
-            self.estimate = None
-            self.message = f'Calibrated on floor {"G" if floor == "0" else floor}. Measuring continuously.'
-            await self.status('ok')
+    def ready_to_zero(self, current_pa=None):
+        if not self.snapshot()['can_calibrate']:
+            return False
+        values = [p for _, p in self.estimator.window]
+        if current_pa is not None:
+            values.append(current_pa)
+        return max(values) - min(values) <= 6
+
+    def zero_on_third_floor(self):
+        self.estimator.zero_from_window('3')
+        self.calibration_floor = '3'
+        self.message = 'Automatically calibrated on floor 3. Measuring continuously.'
 
     async def close(self):
         self.stop.set()
@@ -190,10 +207,6 @@ class Connection(BaseModel):
     port: str | None = None
 
 
-class Calibration(BaseModel):
-    floor_id: Literal['0', '1', '2', '3']
-
-
 controller = PressureController()
 router = APIRouter(prefix='/pressure', tags=['Pressure measurement'])
 
@@ -212,15 +225,6 @@ async def state():
 async def connect(body: Connection):
     try:
         await controller.connect(body.port)
-    except ValueError as exc:
-        raise HTTPException(409, str(exc))
-    return controller.snapshot()
-
-
-@router.post('/calibrate')
-async def calibrate(body: Calibration):
-    try:
-        await controller.calibrate(body.floor_id)
     except ValueError as exc:
         raise HTTPException(409, str(exc))
     return controller.snapshot()

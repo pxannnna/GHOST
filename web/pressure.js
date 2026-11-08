@@ -2,13 +2,9 @@ export function mountPressure(root, onState) {
   root.innerHTML = `<h2>USB barometer</h2>
     <div class="pressure-controls"><label>Device<select data-p="port" aria-label="Pressure device"><option value="">Auto-detect pressure board</option></select></label><button data-p="refresh">Refresh devices</button><button data-p="connect">Connect</button><button data-p="disconnect" disabled>Disconnect</button></div>
     <p data-p="connection" role="status" class="muted">Looking for connected devices…</p>
-    <div class="pressure-calibration-controls"><div class="pressure-controls"><label>Current floor for calibration<select data-p="floor"><option value="">Select your current floor</option><option value="0">G · Ground</option><option value="1">1 · First</option><option value="2">2 · Second</option><option value="3">3 · Third</option></select></label><button data-p="calibrate" disabled>Calibrate here</button></div>
-    <p class="muted">Keep the board still while calibrating. Detection then runs continuously. Recalibrate after reconnecting.</p><p data-p="calibration" class="muted"></p></div>
     <p class="pressure-error" data-p="error" role="alert" hidden></p>
     <button data-p="use" disabled>Use detected floor for room search</button><p data-p="used" class="muted" role="status"></p>`;
-  const calibrationRoot = document.getElementById('pressure-calibration');
-  calibrationRoot.replaceChildren(root.querySelector('.pressure-calibration-controls'));
-  const $ = name => root.querySelector(`[data-p="${name}"]`) ?? calibrationRoot.querySelector(`[data-p="${name}"]`);
+  const $ = name => root.querySelector(`[data-p="${name}"]`);
   let state = null, busy = false, polling = false;
   function buttons() {
     const running = ['connecting','connected','reconnecting'].includes(state?.stage);
@@ -16,13 +12,11 @@ export function mountPressure(root, onState) {
     $('port').disabled = busy || running;
     $('disconnect').disabled = busy || !running;
     $('refresh').disabled = busy;
-    $('calibrate').disabled = busy || !state?.can_calibrate || !$('floor').value;
     $('use').disabled = busy || !state?.fresh || state.estimate?.status !== 'settled';
   }
   function render(next) {
     state = next;
     $('connection').textContent = `${next.port ? next.port + ' · ' : ''}${next.message}`;
-    $('calibration').textContent = next.calibration_floor == null ? 'Not calibrated.' : `Calibrated on floor ${next.calibration_floor === '0' ? 'G' : next.calibration_floor}.`;
     buttons(); onState(next);
   }
   async function refresh() {
@@ -60,8 +54,6 @@ export function mountPressure(root, onState) {
   $('refresh').onclick=refresh;
   $('connect').onclick=()=>action('connect',{port:$('port').value || null});
   $('disconnect').onclick=()=>action('disconnect');
-  $('calibrate').onclick=()=>action('calibrate',{floor_id:$('floor').value});
-  $('floor').onchange=buttons;
   $('use').onclick=async()=>{
     if(busy || !state?.fresh || state.estimate?.status !== 'settled') return;
     const floor=state.estimate.floor_id;

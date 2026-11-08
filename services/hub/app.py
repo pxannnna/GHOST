@@ -43,6 +43,7 @@ GESTURE_COOLDOWN_S = float(CFG["wifi"]["gesture"]["cooldown_s"])
 async def lifespan(app):
     acoustic_controller.publisher = HUB.ingest
     pressure_controller.publisher = HUB.ingest
+    await pressure_controller.start()
     try:
         yield
     finally:
