@@ -19,10 +19,6 @@ python3 -m venv .venv
 .venv/bin/python -m aircraft_audio.identify --demo
 ```
 
-The demo generates a synthetic spectrogram from one hypothetical aircraft and
-searches two aircraft trajectories across five receiver candidates. Its expected receiver is used only to generate
-and evaluate the example; it is not supplied to the search function as an answer.
-
 ## Identification method
 
 For each candidate receiver and flight trajectory:
