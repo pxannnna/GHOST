@@ -1,6 +1,9 @@
 import asyncio
 import copy
 import unittest
+import json
+from pathlib import Path
+import tempfile
 from unittest.mock import patch, AsyncMock
 
 from fastapi import HTTPException
@@ -20,6 +23,45 @@ def recording(label='P1'):
 
 
 class AcousticWebTests(unittest.IsolatedAsyncioTestCase):
+    async def test_automatic_reference_preserves_ranking_and_refreshes_after_filter(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            folder = root / 'data' / 'echo' / ('web-' + self.s.session_id) / 'P1_20261108-090000'
+            folder.mkdir(parents=True)
+            data = recording(); data['recording_dir'] = str(folder.relative_to(root))
+            self.s.accepted = [data]; self.s.last = data; self.s.rerank(); self.s.stage = 'ready'
+            before = copy.deepcopy(self.s.result)
+            manifest = root / 'web' / 'acoustic-plots' / folder.parent.name / folder.name / 'manifest.json'
+            manifest.parent.mkdir(parents=True)
+            manifest.write_text(json.dumps({'revision': 'new'}))
+            proc = unittest.mock.Mock(returncode=0)
+            proc.communicate = AsyncMock(return_value=(b'', None))
+            with patch.object(api, 'ROOT', root), patch.object(api, 'DATA_DIR', root/'data'), patch.object(api, 'controller', self.s), patch.object(api.asyncio, 'create_subprocess_exec', AsyncMock(return_value=proc)):
+                await self.s.refresh_plots()
+                reference = json.loads((folder.parent/'plot_reference.json').read_text())
+                self.assertEqual(reference['room_id'], 'nuc-3-studyroom')
+                self.assertEqual(reference['ceiling_height_m'], 2.45)
+                self.assertEqual(self.s.result, before)
+                self.assertEqual(self.s.last['plot_revision'], 'new')
+                self.assertEqual(self.s.stage, 'ready')
+                await api.floor(api.Settings(floor_id='2'))
+                reference = json.loads((folder.parent/'plot_reference.json').read_text())
+                self.assertNotEqual(reference['room_id'], 'nuc-3-studyroom')
+                self.assertEqual(self.s.accepted, [data])
+                self.s.result = {'status': 'no_match', 'candidates': before['candidates']}
+                await self.s.refresh_plots()
+                self.assertIsNone(json.loads((folder.parent/'plot_reference.json').read_text())['ceiling_height_m'])
+
+    async def test_plot_failure_keeps_recordings_and_restores_stage(self):
+        self.s.accepted = [recording()]; self.s.last = self.s.accepted[0]
+        self.s.rerank(); self.s.stage = 'ready'
+        self.s.last['recording_dir'] = 'outside-session'
+        before = copy.deepcopy(self.s.result)
+        await self.s.refresh_plots()
+        self.assertEqual(self.s.stage, 'ready')
+        self.assertEqual(self.s.result, before)
+        self.assertIn('plot_error', self.s.last)
+
     def setUp(self):
         self.s = api.Session()
         self.s.publisher = AsyncMock()

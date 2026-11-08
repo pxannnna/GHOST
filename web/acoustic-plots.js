@@ -7,6 +7,7 @@ const figures = {
 
 export function mountEchoPlots(root) {
   root.innerHTML = `<div class="echo-plot-tabs" role="group" aria-label="Acoustic figures"></div>
+    <p class="acoustic-note">Ceiling references follow the top-ranked room automatically.</p>
     <figure class="echo-plot-figure"><a class="echo-plot-full" target="_blank" rel="noopener" hidden><img alt="" hidden></a>
     <p class="acoustic-note echo-plot-message" role="status">Start a measurement to see the figures.</p>
     <figcaption hidden></figcaption></figure>
@@ -14,16 +15,19 @@ export function mountEchoPlots(root) {
   const tabs = root.querySelector('.echo-plot-tabs'), img = root.querySelector('img');
   const full = root.querySelector('.echo-plot-full'), open = root.querySelector('.echo-plot-tools a');
   const message = root.querySelector('.echo-plot-message'), caption = root.querySelector('figcaption');
-  const retry = root.querySelector('button');
+  const retry = root.querySelector('.echo-plot-tools button');
   let key = '', folder = '', selected = 'traces', manifest = null, last = null, request = null;
   function show(name) {
     selected = name;
     for (const button of tabs.children) button.setAttribute('aria-pressed', String(button.dataset.figure === name));
     img.hidden = true; full.hidden = true; open.hidden = true; caption.hidden = true;
     message.hidden = false; message.textContent = 'Loading figure…';
-    const url = `${folder}/${name}.png`;
+    const url = `${folder}/${name}.png?v=${encodeURIComponent(manifest.revision ?? '1')}`;
     img.alt = `${figures[name][0]} from this session's recorded audio`;
     caption.textContent = figures[name][1] + ` Positions: ${(name === 'recording' ? [last.measurement.position_label] : name === 'traces' ? manifest.positions : manifest.accepted_positions).join(', ')}.`;
+    if (['traces', 'agreement'].includes(name) && Number.isFinite(manifest.reference_ceiling_height_m)) {
+      caption.textContent += ` Dashed marker: ${manifest.reference_room_label ?? "Top candidate"}, expected ceiling echo from a ${manifest.reference_ceiling_height_m.toFixed(2)} m reference ceiling, minus each position’s microphone height. This reference does not affect the room ranking.`;
+    }
     full.href = open.href = url;
     img.onload = () => { img.hidden = false; full.hidden = false; open.hidden = false; caption.hidden = false; message.hidden = true; };
     img.onerror = () => { message.hidden = false; message.textContent = 'Figure unavailable. Reload figures to try again.'; };
@@ -31,14 +35,16 @@ export function mountEchoPlots(root) {
   }
   async function update(data, force = false) {
     const id = data?.measurement?.measurement_id ?? '';
-    if (key === id && !force) return;
-    key = id; last = data;
+    const revisionKey = `${id}:${data?.plot_revision ?? ''}:${data?.plot_error ?? ''}`;
+    if (key === revisionKey && !force) return;
+    key = revisionKey; last = data;
     request?.abort(); request = new AbortController();
     const currentRequest = request;
     tabs.replaceChildren(); img.onload = img.onerror = null; img.removeAttribute('src');
     img.hidden = full.hidden = open.hidden = caption.hidden = true;
     retry.hidden = !id; message.hidden = false;
     if (!id) { message.textContent = 'Start a measurement to see the figures.'; return; }
+    if (data.plot_error) { message.textContent = 'Figure generation failed. Saved audio and ranking are unchanged.'; return; }
     const match = /^(web-[0-9a-f]+)\/(P[1-8])\/(\d{8}-\d{6})$/.exec(id);
     if (!match) { message.textContent = 'No saved browser recording is available for this measurement.'; return; }
     folder = `/acoustic-plots/${match[1]}/${match[2]}_${match[3]}`;

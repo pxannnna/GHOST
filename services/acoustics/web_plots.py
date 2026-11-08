@@ -5,9 +5,11 @@ figures; agreement, decay and recording figures use her original functions.
 Run with a saved web recording directory to regenerate without playing audio.
 """
 import json
+import math
 from pathlib import Path
 import re
 import sys
+import time
 
 import numpy as np
 
@@ -45,7 +47,31 @@ def select_recordings(current):
     return [chosen[n] for n in sorted(chosen)], current_data
 
 
-def traces(ps, cfg, out):
+def reference_ceiling(config):
+    """A post-ranking plotting reference, never used as evidence by the matcher."""
+    value = config.get('web_plot_reference', {}).get('ceiling_height_m')
+    if value is None:
+        return None
+    value = float(value)
+    if not math.isfinite(value) or not 0 < value <= 20:
+        raise ValueError('Plot reference ceiling height must be between 0 and 20 m.')
+    return value
+
+
+def mark_reference(ax, mic_height, ceiling):
+    if ceiling is None or ceiling <= mic_height:
+        return None
+    distance = ceiling - mic_height
+    if distance <= 8:
+        ax.axvline(distance, color=anna.INK2, linestyle='--', lw=1.2, zorder=3)
+        ax.text(distance + .05 if distance < 5 else distance - .05, -12,
+                f'expected ceiling echo {distance:.2f} m',
+                ha='left' if distance < 5 else 'right', color=anna.INK2, fontsize=9,
+                bbox=dict(fc=anna.SURFACE, ec='none', alpha=.85, pad=1))
+    return distance
+
+
+def traces(ps, cfg, out, ceiling=None):
     fig, axes = anna.plt.subplots(len(ps), 1, figsize=(11, 2.8 * len(ps) + .7),
                                   sharex=True, facecolor=anna.SURFACE)
     for ax, p in zip(np.atleast_1d(axes), ps):
@@ -58,11 +84,17 @@ def traces(ps, cfg, out):
         anna._style(ax, 'level vs direct (dB)')
         ax.set_ylim(-80, 3)
         ax.set_xlim(0, 8)
+        mark_reference(ax, p['mic_h'], ceiling)
         ax.set_title(f"{p['label']}   RT60 {p['feats'].rt60_s} s   mic height {p['mic_h']} m",
                      loc='left', color=anna.INK, fontsize=11)
     np.atleast_1d(axes)[-1].set_xlabel('distance from the laptop to the reflecting surface (m)   —   dots = detected echoes',
                                     color=anna.INK2, fontsize=9)
-    fig.suptitle('Echo traces by measurement position', x=.01, ha='left', color=anna.INK, fontsize=12)
+    np.atleast_1d(axes)[0].text(.3, -6, '← direct sound (speaker to mic)', color=anna.INK2, fontsize=9,
+                              zorder=5, bbox=dict(fc=anna.SURFACE, ec='none', alpha=.95, pad=1))
+    title = 'Echo traces: sound reflected back to the microphone'
+    if ceiling is not None:
+        title += f'\nDashed line = candidate reference ceiling {ceiling:.2f} m − microphone height (not a detected peak)'
+    fig.suptitle(title, x=.01, ha='left', color=anna.INK, fontsize=11)
     fig.tight_layout(rect=(0, 0, 1, .96))
     anna._save(fig, out, ps)
     anna.plt.close(fig)
@@ -75,7 +107,11 @@ def render_capture(directory):
             or not re.fullmatch(r'P[1-8]_\d{8}-\d{6}', current.name)):
         raise ValueError('Expected a local browser capture directory.')
     dirs, data = select_recordings(current)
-    cfg = load_config()['echolocation'].copy()
+    config = load_config()
+    reference_file = current.parent / 'plot_reference.json'
+    reference = json.loads(reference_file.read_text(encoding='utf-8')) if reference_file.exists() else {}
+    ceiling = reference_ceiling({'web_plot_reference': reference})
+    cfg = config['echolocation'].copy()
     cfg.update(speaker_mic_m=data['settings']['speaker_mic_m'], mic_height_m=data['mic_height_m'])
     ps = [anna.load_position(d, cfg) for d in dirs]
     latest = next((p for p in ps if p['dir'] == current), None) or anna.load_position(current, cfg)
@@ -83,13 +119,18 @@ def render_capture(directory):
     out.mkdir(parents=True, exist_ok=True)
     # Rejected captures get their own trace, without entering accepted comparisons.
     displayed = ps if usable(data) else [latest]
-    traces(displayed, cfg, out / 'traces.png')
+    traces(displayed, cfg, out / 'traces.png', ceiling)
     anna.fig_recording(latest, out / 'recording.png')
     if ps:
         anna.fig_decay(ps, out / 'decay.png')
     if len(ps) >= 2:
-        anna.fig_agreement(ps, cfg, None, out / 'agreement.png')
+        anna.fig_agreement(ps, cfg, ceiling, out / 'agreement.png')
     manifest = {'measurement_id': data['measurement']['measurement_id'],
+                'revision': str(time.time_ns()),
+                'reference_ceiling_height_m': ceiling,
+                'reference_room_id': reference.get('room_id'),
+                'reference_room_label': reference.get('label'),
+                'microphone_heights_m': {p['label']: p['mic_h'] for p in displayed},
                 'positions': [p['label'] for p in displayed],
                 'accepted_positions': [p['label'] for p in ps],
                 'plots': ['traces', 'recording'] + (['decay'] if ps else []) + (['agreement'] if len(ps) >= 2 else [])}

@@ -1,4 +1,4 @@
-import { mountEchoPlots } from "./acoustic-plots.js?v=anna-20261108-1";
+import { mountEchoPlots } from "./acoustic-plots.js?v=anna-20261108-auto";
 export function mountAcoustics(root, onState) {
   root.className = 'acoustic-panel';
   root.innerHTML = `
@@ -28,7 +28,7 @@ export function mountAcoustics(root, onState) {
   const write = (id, value) => { if ($(id).textContent !== value) $(id).textContent = value; };
   const fmt = (n, places = 2) => Number.isFinite(n) ? n.toFixed(places) : '—';
   let state = null, busy = false, polling = false, reachable = false, inventory = false, ranked = '';
-  const working = () => ['measuring', 'cancelling'].includes(state?.stage);
+  const working = () => ['measuring', 'cancelling', 'plotting'].includes(state?.stage);
   function buttons() {
     const locked = busy || !reachable || working(), count = state?.positions?.length ?? 0;
     $('start').disabled = locked || !inventory || !$('input').value || !$('output').value || (count > 0 && !$('moved').checked) || count >= 8;
@@ -48,12 +48,12 @@ export function mountAcoustics(root, onState) {
     $('floor').value = s.floor_id ?? '';
     write('scope', s.floor_id === null ? 'All 14 database rooms · no floor restriction' : `Manual floor ${s.floor_id==='0'?'G':s.floor_id} · existing recordings are re-ranked`);
     write('message',s.message);$('message').dataset.stage=s.stage;
-    $('progress').hidden = !working();$('progress').value=s.progress;
+    $('progress').hidden = !['measuring', 'cancelling'].includes(s.stage);$('progress').value=s.progress;
     const m=s.last?.measurement, result=s.result, count=s.positions?.length??0;
     write('rt60',m?.rt60_s == null?'—':fmt(m.rt60_s,3)+' s');write('snr',m?.snr_db == null?'—':fmt(m.snr_db,1)+' dB');
     write('ceiling',result?.measured?.height_m == null?'Needs multiple positions':fmt(result.measured.height_m)+' m');write('count',String(count));
     write('chart-label',m?`${m.position_label} · ${s.last.quality_issues?.length?'excluded from ranking':'recorded'}`:'No recording yet');
-    draw(s.last);
+    if (s.stage !== 'plotting') draw(s.last);
     const labels={listening:'Awaiting measurement',candidate:'Candidate',supported:'Supported',ambiguous:'Ambiguous',no_match:'No match'};
     write('result-status',labels[result?.status]??'Awaiting measurement');
     const terms=Object.keys(result?.candidates?.[0]?.cost_terms??{}).map(t=>({rt60:'reverberation',height:'ceiling height',wall:'nearest wall',span:'wall span'})[t]??t);

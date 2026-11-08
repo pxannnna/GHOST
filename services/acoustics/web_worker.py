@@ -39,12 +39,6 @@ def capture(settings):
                'recording_dir': str(result.out_dir.relative_to(Path(__file__).resolve().parents[2])),
                'mic_height_m': result.mic_height_m, 'settings': settings}
     (result.out_dir/'web_capture.json').write_text(json.dumps(payload, allow_nan=False), encoding='utf-8')
-    try:
-        from .web_plots import render_capture
-        render_capture(result.out_dir)
-    except Exception as exc:
-        # A plotting problem must not discard an otherwise usable measurement.
-        payload['plot_error'] = str(exc)
     return payload
 
 

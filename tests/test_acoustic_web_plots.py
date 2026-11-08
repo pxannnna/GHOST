@@ -3,10 +3,22 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from services.acoustics.web_plots import select_recordings, render_capture
+from services.acoustics.web_plots import select_recordings, render_capture, reference_ceiling, mark_reference, anna
 
 
 class WebPlotSelectionTests(unittest.TestCase):
+    def test_reference_marker_uses_actual_mic_height_and_requires_explicit_reference(self):
+        self.assertIsNone(reference_ceiling({'echolocation': {'mic_height_m': .75}}))
+        ceiling = reference_ceiling({'web_plot_reference': {'ceiling_height_m': 2.45}})
+        fig, axes = anna.plt.subplots(2, 1)
+        try:
+            mark_reference(axes[0], .75, ceiling)
+            self.assertIn('1.70 m', axes[0].texts[0].get_text())
+            mark_reference(axes[1], .45, 2.5)
+            self.assertIn('2.05 m', axes[1].texts[0].get_text())
+        finally:
+            anna.plt.close(fig)
+
     def test_retries_rejections_and_future_positions_do_not_pollute_comparison(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

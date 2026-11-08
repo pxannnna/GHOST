@@ -1,4 +1,4 @@
-import { mountAcoustics } from "./acoustics.js?v=anna-20261108-1";
+import { mountAcoustics } from "./acoustics.js?v=anna-20261108-auto";
 import { mountWifi } from "./wifi.js?v=study-20261108-1";
 import { mountBuilding } from "./building3d/index.js?v=study-20261108-1";
 import { sessionResult } from "./session-result.mjs";

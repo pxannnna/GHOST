@@ -113,7 +113,7 @@ class Session:
         self.matching = {**DEFAULT_MATCHING, **load_config()['echolocation'].get('matching', {})}
 
     def available(self):
-        if self.stage in ('measuring', 'cancelling'):
+        if self.stage in ('measuring', 'cancelling', 'plotting'):
             raise HTTPException(409, 'A measurement is already running. Wait or cancel it first.')
 
     def rerank(self):
@@ -129,6 +129,48 @@ class Session:
         for c in result['candidates']: c['floor_ids'] = lookup[c['room_id']].floor_ids
         result.update(floor_id=self.floor_id, floor_source='manual')
         self.result = result
+
+    def plot_reference(self):
+        result = self.result or {}
+        candidates = result.get('candidates', [])
+        if result.get('status') not in ('supported', 'candidate', 'ambiguous') or not candidates:
+            return {'ceiling_height_m': None, 'room_id': None, 'label': None}
+        room = next((r for r in self.rooms if r.room_id == candidates[0]['room_id']), None)
+        if room is None:
+            return {'ceiling_height_m': None, 'room_id': None, 'label': None}
+        return {'ceiling_height_m': room.ceiling_height_m, 'room_id': room.room_id, 'label': room.label}
+
+    async def refresh_plots(self):
+        """Annotate only after ranking; the reference is never a matcher input."""
+        if not self.last or not self.last.get('recording_dir'):
+            return
+        directory = (ROOT / self.last['recording_dir']).resolve()
+        session_dir = (DATA_DIR / 'echo' / ('web-' + self.session_id)).resolve()
+        if directory.parent != session_dir or not directory.is_dir():
+            self.last['plot_error'] = 'This session has no saved recording directory.'
+            return
+        previous_stage, previous_message = self.stage, self.message
+        self.stage, self.message = 'plotting', 'Updating figures from the room ranking…'
+        proc = None
+        try:
+            (session_dir / 'plot_reference.json').write_text(json.dumps(self.plot_reference()), encoding='utf-8')
+            proc = await asyncio.create_subprocess_exec(
+                sys.executable, '-m', 'services.acoustics.web_plots', str(directory), cwd=ROOT,
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            await asyncio.wait_for(proc.communicate(), timeout=45)
+            if proc.returncode != 0:
+                raise RuntimeError('Figure generation failed.')
+            manifest = ROOT / 'web' / 'acoustic-plots' / session_dir.name / directory.name / 'manifest.json'
+            self.last['plot_revision'] = json.loads(manifest.read_text(encoding='utf-8'))['revision']
+            self.last.pop('plot_error', None)
+        except Exception as exc:
+            self.last['plot_error'] = str(exc) or 'Figure generation timed out.'
+        finally:
+            if proc is not None and proc.returncode is None:
+                proc.kill()
+                await proc.wait()
+            self.stage, self.message = previous_stage, previous_message
 
     def snapshot(self):
         return {'stage': self.stage, 'message': self.message, 'progress': self.progress,
@@ -190,11 +232,13 @@ class Session:
             if data['quality_issues']:
                 self.stage = 'rejected'
                 self.message = 'Recording excluded from ranking. ' + ' '.join(data['quality_issues'])
+                await self.refresh_plots()
                 return
             self.accepted.append(data)
             self.rerank()
             self.stage = 'ready'
             self.message = f"{len(self.accepted)} position(s) measured. Move to another position to add evidence."
+            await self.refresh_plots()
             await self.publish('acoustic.measurement', data['measurement'])
             await self.publish('room.estimate', self.result)
         except Exception as exc:
@@ -234,6 +278,7 @@ async def floor(body: Settings):
         controller.available()
         controller.floor_id = body.floor_id
         controller.rerank()
+        await controller.refresh_plots()
         await controller.publish('room.estimate', controller.result)
         return controller.snapshot()
 
@@ -244,6 +289,7 @@ async def cancel():
         controller.message = 'Stopping playback and recording…'
         controller.cancelled.set()
     return controller.snapshot()
+
 
 @router.post('/reset')
 async def reset():
