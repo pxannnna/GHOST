@@ -41,7 +41,7 @@ class App:
         self.result_events = queue.Queue()
         self.next_diagnostic = 0
         self.pulse = Pulse()
-        self.trace = deque(maxlen=240)
+        self.trace = deque(maxlen=3000)
         self.connection_text = 'Plug in your ESP32-C6 using a USB data cable.'
         self.result_text = 'No experiment has been recorded yet.'
         root.title('GHOST | Wi-Fi motion demo')
@@ -211,7 +211,7 @@ class App:
             if not self.compatible:
                 return
             self.last_report_time, self.last_report = now,value
-            self.trace.append((now,value.jitter))
+            self.trace.append((now,value.jitter,value.jitter_median))
             self.flow.on_report(value,now)
             if self.flow.thresholds and self.flow.stage in ('empty','waiting_walk','walking','complete'):
                 self.pulse.update(value.motion,now)
@@ -357,7 +357,7 @@ class App:
         self.progress.configure(value=100*(1-min(remaining,duration)/duration) if stage in ('empty','walking','calibrating','countdown_empty','countdown_walk') else 0)
         metrics = f'Green pulses: {self.pulse.count}  |  Result age: '+(f'{now-self.last_report_time:.1f} s' if self.last_report_time else 'unknown')
         if self.last_report:
-            metrics += f'  |  Jitter: {self.last_report.jitter:.5f}  |  Motion: {self.last_report.motion}'
+            metrics += f'  |  0.2 x Jitter: {0.2*self.last_report.jitter:.5f}  |  Official Motion: {self.last_report.motion}'
         self.metrics.configure(text=metrics)
         self.result_label.configure(text='Saving comparison plots...' if self.exporting else self.result_text)
         self.draw_trace(now)
@@ -371,20 +371,56 @@ class App:
     def draw_trace(self, now):
         self.chart.delete('all')
         w = max(100,self.chart.winfo_width())
-        points = [(t,v) for t,v in self.trace if now-t<15]
-        self.chart.create_text(10,10,anchor='nw',fill=MUTED,text='Jitter / last 15 s / auto-scaled')
-        scale = max([v for _,v in points]+[.001])
-        segment = []
-        prev = None
-        for t,v in points:
-            if prev is not None and t-prev>.2:
-                if len(segment)>=4:
-                    self.chart.create_line(*segment,fill=GREEN,width=2)
-                segment = []
-            segment += [10+(t-(now-15))/15*(w-20),96-v/scale*60]
-            prev = t
-        if len(segment)>=4:
-            self.chart.create_line(*segment,fill=GREEN,width=2)
+        points = [(t,0.2*v,median) for t,v,median in self.trace if 0 <= now-t < 15]
+        threshold = self.flow.thresholds['motion'] if self.flow.thresholds else None
+        self.chart.create_text(10,5,anchor='nw',fill=MUTED,
+                               text='0.2 x Jitter / last 15 s / fixed scale',font=('Segoe UI',9))
+        if not threshold:
+            self.chart.create_text(w/2,58,fill=MUTED,
+                                   text='Complete empty-area calibration to show the reference line.')
+            return
+        # Display only: the lamp still uses the board's official motion flag.
+        # Lock the range to calibration, rather than rescaling to recent peaks.
+        scale = 3*threshold
+        left, right, top, bottom = 65, w-12, 32, 82
+        height = bottom-top
+        amber, blue = '#ffbf69', '#65baff'
+        self.chart.create_text(w-10,5,anchor='ne',fill=amber,
+                               text=f'Calibration reference: {threshold:.5g}',font=('Segoe UI',9))
+        dynamic_label = f'{points[-1][2]:.5g}' if points else 'waiting for data'
+        self.chart.create_text(10,19,anchor='nw',fill=blue,
+                               text=f'Dynamic reference (recent jitter median): {dynamic_label}',font=('Segoe UI',8))
+        for value in (0,threshold,scale):
+            y = bottom-value/scale*height
+            self.chart.create_text(left-5,y,anchor='e',fill=MUTED,
+                                   text=f'{value:.3g}',font=('Segoe UI',8))
+        self.chart.create_line(left,top,left,bottom,right,bottom,fill='#52697d')
+        y = bottom-threshold/scale*height
+        self.chart.create_line(left,y,right,y,fill=amber,dash=(6,4),width=2)
+        self.chart.create_text(left,101,anchor='sw',fill=MUTED,font=('Segoe UI',8),
+                               text='Reference only; lamp follows official Motion.  Time: -15 s to now.')
+        # On the scaled-jitter axis the dynamic reference is the raw median,
+        # not 0.2 * median or the console's median / sensitivity field.
+        for column,color,dash in ((2,blue,(3,3)),(1,GREEN,())):
+            segment = []
+            prev = None
+            for point in points:
+                t,v = point[0],point[column]
+                if prev is not None and t-prev>.2:
+                    if len(segment)>=4:
+                        self.chart.create_line(*segment,fill=color,width=2,dash=dash)
+                    segment = []
+                x = left+(t-(now-15))/15*(right-left)
+                segment += [x,bottom-min(max(v,0),scale)/scale*height]
+                if v > scale:
+                    self.chart.create_polygon(x-3,top+4,x+3,top+4,x,top-1,
+                                              fill=blue if column==2 else amber)
+                prev = t
+            if len(segment)>=4:
+                self.chart.create_line(*segment,fill=color,width=2,dash=dash)
+        if any(max(v,median) > scale for _,v,median in points):
+            self.chart.create_text(right,top-2,anchor='se',fill=amber,font=('Segoe UI',8),
+                                   text='Above-range values marked at top')
 
     def close(self):
         if self.installing:

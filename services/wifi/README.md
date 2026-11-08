@@ -64,6 +64,17 @@ Calibration and timers are automatic after your readiness confirmations. The
 application cannot verify that the room is physically empty or move people.
 Sound depends on Windows audio settings; always watch the on-screen prompt.
 
+The live chart shows `0.2 * jitter` and an orange dashed line for the trained
+motion threshold. A blue dashed trace shows the recent jitter median reported by
+the board: the dynamic reference on the `0.2 * jitter` axis, without additional
+scaling. Its vertical range stays at zero to three times the trained threshold
+until recalibration; orange markers identify signal peaks above the displayed
+range, and blue markers identify an above-range dynamic reference.
+Before successful calibration, the chart waits for a valid reference. This is a
+display aid: the green lamp still follows the official motion flag, including
+its dynamic-reference and multi-report checks. Crossing the displayed line alone
+does not determine the lamp state.
+
 ## Saved files
 
 Every experiment gets a new UTC-named folder under `data/wifi/demo/`:
