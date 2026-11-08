@@ -14,7 +14,7 @@ when that fits better than every room. Alder (the LG theatre) is off limits and 
 | File | Edit? | What |
 |---|---|---|
 | `trace_nucleus.json` | rarely | Room outlines in PDF points, room kind, seats |
-| `measurements.json` | **yes** | Ceiling heights (measured 7 Nov by Anna; study rooms on 1/2 estimated = 3rd-floor study room), scale wall |
+| `measurements.json` | **yes** | Ceiling heights (measured 7 Nov; study rooms on 1/2 estimated = 3rd-floor study room), scale wall |
 | `rooms.json` | no (generated) | `python -m services.acoustics.build_rooms` — read by the matcher (and later the 3D model) |
 
 Every room says where its numbers came from (`ceiling_source`, `outline_source`, `scale_source`, `approximate`).

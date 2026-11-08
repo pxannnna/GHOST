@@ -1,5 +1,5 @@
 {
- "_comment": "Measured on site by Anna, 7 Nov 2026 (floor to ceiling, metres). 'ceiling_source' says measured vs estimated. Estimated = same as a measured room of the same type, per Anna's rule (all study rooms alike, etc.).",
+ "_comment": "Measured on site, 7 Nov 2026 (floor to ceiling, metres). 'ceiling_source' says measured vs estimated. Estimated = same as a measured room of the same type, (all study rooms alike, etc.).",
  "scale_reference": {
   "_comment": "Plan scale from a tape-measured rectangular room (long side <-> long side). Yew's plan aspect 1.235 vs taped 1.261: consistent to 2%.",
   "room_id": "nuc-2-yew",
