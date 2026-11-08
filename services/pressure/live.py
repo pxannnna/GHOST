@@ -1,19 +1,23 @@
 """Phone barometer -> floor, streamed to the hub.
 
-    make pressure-live                                  # phyphox at pressure.phone_url
+    make pressure-live                                  # the USB barometer board (pressure.source "board")
+    python -m services.pressure.live --source phyphox   # the phone instead (pressure.phone_url)
     python -m services.pressure.live --zero-floor 0     # zero on G as soon as readings settle
     python -m services.pressure.live --csv walk.csv     # replay a phyphox CSV export (mode=replay)
 
 While running, type a command + Enter:
     z      zero here, on the reference floor (G)
     z2     zero here, on floor 2
-    q      quit
+    t2     "I am standing on floor 2 now": logs the true floor so the detector can be scored (type t0..t3
+           once you are standing still; the log is data/pressure/walks/walk_<time>.csv)
+    q      quit (prints how often the detector had the right floor)
 The calibration is saved to data/pressure/calibration.json and reloaded on
 restart (its age is printed: re-zero if it's more than ~1 hour old).
 """
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import queue
 import sys
@@ -22,7 +26,8 @@ import time
 from pathlib import Path
 from typing import Iterator, List, Optional, Tuple
 
-from shared.config import DATA_DIR, load_config
+from shared.config import DATA_DIR, ROOT, load_config
+from services.pressure import walkscore
 from services.pressure.floor import FloorEstimator, FloorState
 from services.pressure.phyphox import PhyphoxClient, read_csv
 
@@ -87,6 +92,8 @@ def csv_samples(path: Path, speed: float) -> Iterator[Tuple[float, float, float]
 
 def main(argv: Optional[List[str]] = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--source", choices=["board", "phyphox"], help="pressure source (default: config pressure.source)")
+    ap.add_argument("--serial", help="serial port of the board (default: found automatically)")
     ap.add_argument("--url", help="phyphox URL (default config pressure.phone_url)")
     ap.add_argument("--csv", type=Path, help="replay a phyphox CSV export instead (mode=replay)")
     ap.add_argument("--speed", type=float, default=1.0, help="CSV replay speed (0 = as fast as possible)")
@@ -112,8 +119,15 @@ def main(argv: Optional[List[str]] = None) -> None:
         if state != "ok":
             print(f"[{state}] {detail}")
 
+    source = "board" if a.serial else (a.source or ("phyphox" if a.url else cfg.get("source", "board")))
     if a.csv:
         samples = csv_samples(a.csv, a.speed)
+    elif source == "board":
+        from services.pressure import board
+        port = a.serial or cfg.get("serial_port")
+        if not board.find_port(port):
+            sys.exit("no barometer board found: plug it in (check `ls /dev/cu.*`), or use --source phyphox")
+        samples = board.samples(port, cfg.get("board_rate_hz", 5.0), status)
     else:
         url = a.url or cfg.get("phone_url")
         if not url:
@@ -126,6 +140,23 @@ def main(argv: Optional[List[str]] = None) -> None:
     last_emit_sample, last_floor_emit, last_key = 0.0, 0.0, None
     min_dt = 1.0 / cfg["poll_hz"]
 
+    log_path = log_file = log_writer = None
+    true_floor = ""
+    if not a.csv:
+        log_path = DATA_DIR / "pressure" / "walks" / f"walk_{time.strftime('%Y%m%d-%H%M%S')}.csv"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        log_file = open(log_path, "w", newline="")
+        log_writer = csv.writer(log_file)
+        log_writer.writerow(walkscore.COLUMNS)
+        print(f"logging to {log_path.relative_to(ROOT)}  (type t0, t1, t2 or t3 when you stand still on a floor)")
+
+    def finish() -> None:
+        if log_file:
+            log_file.close()
+            print("\n" + walkscore.format_summary(walkscore.summarize(log_path)))
+        if client:
+            client.close()
+
     for now, t_phone, hpa in samples:
         pa = hpa * 100.0
         # Estimator runs on the phone's clock (correct speeds even in fast replay);
@@ -135,20 +166,30 @@ def main(argv: Optional[List[str]] = None) -> None:
         while not cmds.empty():
             c = cmds.get()
             if c == "q":
+                finish()
                 return
             if c.startswith("z"):
                 f = c[1:].strip() or est.reference_floor
                 print("zeroed:", est.zero_from_window(f))
                 save_cal(est)
                 status("ok", f"zeroed on floor {f}")
+                true_floor = f
+            if c.startswith("t") and c[1:].strip().isdigit():
+                true_floor = c[1:].strip()
+                print(f"true floor set to {true_floor}")
         if pending_zero is not None and len(est.window) >= 3 and \
                 est.window[-1][0] - est.window[0][0] >= 0.8 * est.dwell_s:
             print("zeroed:", est.zero_from_window(pending_zero))
             if not a.csv:
                 save_cal(est)
             status("ok", f"zeroed on floor {pending_zero}")
+            true_floor = pending_zero
             pending_zero = None
             st = est.update(t_phone, pa)
+        if log_writer:
+            log_writer.writerow([round(now, 3), round(t_phone, 3), round(hpa, 4), st.floor_id or "", st.status,
+                                 "" if st.relative_height_m is None else round(st.relative_height_m, 2), true_floor])
+            log_file.flush()
 
         if client and now - last_emit_sample >= min_dt:
             client.emit("pressure.sample", {"pressure_pa": round(pa, 2), "sensor_timestamp": t_phone,
@@ -168,8 +209,7 @@ def main(argv: Optional[List[str]] = None) -> None:
                 print(f"{time.strftime('%H:%M:%S')}  floor {st.floor_id}  [{st.status}]  height {h}  "
                       f"({hpa:.3f} hPa)")
             last_key, last_floor_emit = key, now
-    if client:
-        client.close()
+    finish()
 
 
 if __name__ == "__main__":
