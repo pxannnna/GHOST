@@ -6,7 +6,9 @@
   <meta name="theme-color" content="#f6f7f9">
   <meta name="description" content="GHOST indoor sensing demo at HackTheBurgh.">
   <title>GHOST — Indoor sensing demo</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css?v=study-20261108-1">
+  <link rel="stylesheet" href="/wifi.css?v=csi-20261108-2">
+  <link rel="stylesheet" href="/acoustics.css?v=anna-20261108-1">
 </head>
 <body>
   <a class="skip-link" href="#overview">Skip to content</a>
@@ -33,14 +35,14 @@
           <span id="slide-mode" class="badge" hidden></span>
         </div>
         <h1 id="title">Indoor sensing</h1>
-        <p id="description">A phone barometer narrows the search to one floor. A laptop listens for echoes to rank the rooms on that floor. A hand gesture turns the page.</p>
+        <p id="description">A phone barometer narrows the search to one floor. A laptop listens for echoes to rank the rooms on that floor. Wi-Fi detects movement.</p>
 
         <h2 id="measurements">How the demo works</h2>
         <div class="instrument" data-view="intro">
           <ol class="pipeline">
             <li><span>01</span><strong>Air pressure</strong><small>Find the floor</small></li>
             <li><span>02</span><strong>Room echoes</strong><small>Rank the matches</small></li>
-            <li><span>03</span><strong>Wi-Fi signal</strong><small>Turn the page</small></li>
+            <li><span>03</span><strong>Wi-Fi signal</strong><small>Detect movement</small></li>
           </ol>
         </div>
         <div class="instrument" data-view="floor" hidden>
@@ -49,25 +51,31 @@
           <svg id="pressure-trace" class="trace" viewBox="0 0 480 90" preserveAspectRatio="none" role="img" aria-label="Pressure samples over time"><polyline/></svg>
           <p id="floor-status" class="muted"></p>
         </div>
-        <div class="instrument" data-view="room" hidden>
-          <div class="trace-heading"><span>Impulse response · RT60 <b id="rt60">—</b></span><span id="echo-mode"></span></div>
-          <svg id="echo-trace" class="trace lilac" viewBox="0 0 480 90" preserveAspectRatio="none" role="img" aria-label="Impulse response preview"><polyline/></svg>
-          <p id="echo-details" class="muted"></p>
-          <div class="trace-heading candidate-heading"><h3>Ranked room candidates</h3><span id="room-status"></span></div>
-          <ol id="candidates" class="candidates"></ol>
-        </div>
+        <div class="instrument" data-view="room" hidden><div id="acoustics-panel"></div></div>
         <div class="instrument" data-view="model" hidden>
           <div class="readout"><div><small>Highlighted floor</small><strong id="model-floor">—</strong></div><div><small>Top candidate</small><strong id="model-room">—</strong></div></div>
           <p class="muted">The highlighted storey follows the floor estimate. The strongest room match is shown within that storey.</p>
         </div>
         <div class="instrument" data-view="gesture" hidden>
+          <div id="wifi-panel"></div><div hidden>
           <div class="readout"><div><small>Motion score</small><strong id="motion-score">—</strong></div><div><small>Packet rate</small><strong id="packet-rate">—</strong></div></div>
           <div class="trace-heading"><span>Reduced CSI trace</span><span id="wifi-mode"></span></div>
           <svg id="wifi-trace" class="trace lilac" viewBox="0 0 480 90" preserveAspectRatio="none" role="img" aria-label="Reduced Wi-Fi CSI trace"><polyline/></svg>
-          <ol id="gesture-log" class="event-list"></ol>
+          <ol id="gesture-log" class="event-list"></ol></div>
         </div>
         <div class="instrument" data-view="results" hidden>
-          <dl class="summary"><dt>Floor estimate</dt><dd id="result-floor">—</dd><dt>Top room match</dt><dd id="result-room">—</dd><dt>Last slide trigger</dt><dd id="result-trigger">—</dd></dl>
+          <div class="result-location">
+            <p class="eyebrow" id="result-status">Awaiting measurement</p>
+            <h2 id="result-room">Awaiting room measurement</h2>
+            <p id="result-floor">The Nucleus</p>
+          </div>
+          <dl class="result-metrics"><div><dt>Match score</dt><dd id="result-score">—</dd></div><div><dt>Reverberation · RT60</dt><dd id="result-rt60">—</dd></div><div><dt>Signal / noise</dt><dd id="result-snr">—</dd></div></dl>
+          <p class="muted" id="result-note"></p>
+          <ol class="result-evidence">
+            <li><span>01</span><div><h3>Floor</h3><p id="result-pressure">Awaiting pressure measurement</p><small id="result-scope"></small></div><button data-retest="floor" type="button">Test pressure →</button></li>
+            <li><span>02</span><div><h3>Room echoes</h3><p id="result-acoustic">Awaiting measurement</p></div><button data-retest="room" type="button">Measure echoes →</button></li>
+            <li><span>03</span><div><h3>Movement</h3><p id="result-motion" role="status">Awaiting motion detection</p></div><button data-retest="gesture" type="button">Open detector →</button></li>
+          </ol>
         </div>
       </section>
 
@@ -89,7 +97,7 @@
         <button id="next" class="primary" type="button" disabled>Next →</button>
         <span class="key-hint"><kbd>←</kbd> <kbd>→</kbd> keyboard</span>
       </div>
-      <div class="gesture-controls">
+      <div class="gesture-controls" hidden>
         <span id="gesture-status">Gesture disarmed</span>
         <button id="arm" type="button" aria-pressed="false" disabled>Arm gesture</button>
         <button id="simulate" type="button" hidden disabled>Simulate gesture</button>
@@ -114,6 +122,6 @@
     </aside>
     </div>
   </div>
-  <script type="module" src="/app.js"></script>
+  <script type="module" src="/app.js?v=anna-20261108-1"></script>
 </body>
 </html>

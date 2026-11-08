@@ -103,7 +103,7 @@ def _simulated_recordings(room_id: str, sweep: Sweep, cfg: Dict[str, Any], repea
 def measure_position(position: str, room_tag: Optional[str] = None, repeats: Optional[int] = None,
                      mic_height: Optional[float] = None, simulate: Optional[str] = None,
                      save: bool = True, seed: Optional[int] = None,
-                     cfg: Optional[Dict[str, Any]] = None) -> MeasurementResult:
+                     cfg: Optional[Dict[str, Any]] = None, progress=None) -> MeasurementResult:
     cfg = cfg or echo_cfg()
     sweep = sweep_from_cfg(cfg)
     repeats = repeats or cfg["sweep"]["repeats"]
@@ -120,9 +120,17 @@ def measure_position(position: str, room_tag: Optional[str] = None, repeats: Opt
     else:
         from services.acoustics.audio_io import play_and_record
         for k in range(repeats):
+            if progress:
+                progress(k, repeats)
             y, info = play_and_record(sweep.signal, sweep.fs, cfg["input_device"], cfg["output_device"],
                                       gain=cfg["output_gain"], tail_s=cfg["sweep"]["silence_after_s"])
             recs.append(y)
+            info.setdefault("capture_checks", [])
+            # Keep quality for every sweep, not only the last recording.
+            if k == 0:
+                checks = []
+            checks.append({key: info[key] for key in ("peak", "clipped", "too_quiet")})
+            info["capture_checks"] = checks
             print(f"  sweep {k + 1}/{repeats}: peak {info['peak']:.3f} ({info['stream']})"
                   + ("  CLIPPED - lower output_gain" if info["clipped"] else "")
                   + ("  TOO QUIET - raise volume / move mic closer" if info["too_quiet"] else ""))

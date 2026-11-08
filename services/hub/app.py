@@ -21,6 +21,10 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Deque, Dict, List, Optional, Set, Tuple
 
+from contextlib import asynccontextmanager
+from services.wifi.live.api import router as wifi_router, controller as wifi_controller
+from services.acoustics.web_api import router as acoustic_router, controller as acoustic_controller
+
 from fastapi import Body, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -34,7 +38,18 @@ SESSION_ID = os.environ.get("SESSION_ID", "session-001")
 VIEWS = list(CFG["demo"]["views"])
 GESTURE_COOLDOWN_S = float(CFG["wifi"]["gesture"]["cooldown_s"])
 
-app = FastAPI(title="GHOST hub")
+@asynccontextmanager
+async def lifespan(app):
+    acoustic_controller.publisher = HUB.ingest
+    try:
+        yield
+    finally:
+        await acoustic_controller.shutdown()
+        await wifi_controller.shutdown()
+
+app = FastAPI(title="GHOST hub", lifespan=lifespan)
+app.include_router(wifi_router)
+app.include_router(acoustic_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],

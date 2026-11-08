@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 node_modules/
 web/dist/
+web/acoustic-plots/
 config/local.json
 .env
 # raw captures: keep locally, copy to the shared drive at H8
@@ -11,6 +12,7 @@ data/
 !data/fixtures/
 !data/.gitkeep
 firmware/xiao/build/
+firmware/xiao/.artifacts/
 *.wav
 *.flac
 .DS_Store

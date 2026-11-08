@@ -1,21 +1,26 @@
-import { mountBuilding } from "./building3d/index.js";
+import { mountAcoustics } from "./acoustics.js?v=anna-20261108-1";
+import { mountWifi } from "./wifi.js?v=study-20261108-1";
+import { mountBuilding } from "./building3d/index.js?v=study-20261108-1";
+import { sessionResult } from "./session-result.mjs";
 
 const slides = {
-  intro: ["Introduction", "Indoor sensing", "A phone barometer narrows the search to one floor. A laptop listens for echoes to rank the rooms on that floor. A hand gesture turns the page."],
+  intro: ["Introduction", "Indoor sensing", "A phone barometer narrows the search to one floor. A laptop listens for echoes to rank the rooms on that floor. Wi-Fi detects movement."],
   floor: ["Floor detection", "Floor detection", "Air pressure falls as we go up. A calibrated reference helps choose which floor to search."],
   room: ["Room identification", "Room identification", "A speaker plays a sweep and the microphone catches the reflections. The echoes help rank the rooms on the estimated floor."],
   model: ["Building model", "Building model", "The building view marks the estimated floor and the strongest room candidate."],
-  gesture: ["Gesture control", "Gesture control", "A deliberate gesture changes the Wi-Fi signal. When armed, the Hub decides whether to advance the presentation."],
-  results: ["Results", "Results", "Pressure narrows the search, echoes rank the candidates, and Wi-Fi controls the presentation."],
+  gesture: ["Motion detection", "Wi-Fi motion detection", ""],
+  results: ["Results", "From signals to a room", "A floor, a room, and movement within it. Review the measurements together, then return to any step to test again."],
 };
 const measurementTitles = {
   intro: "How the demo works", floor: "Pressure measurements", room: "Acoustic measurements",
-  model: "Estimated position", gesture: "Wi-Fi measurements", results: "Session results",
+  model: "Estimated position", gesture: "Calibration & continuous detection", results: "Session results",
 };
 const byId = id => document.getElementById(id);
 const text = (id, value) => { byId(id).textContent = value; };
 const format = (value, decimals, unit = "") => Number.isFinite(value) ? value.toFixed(decimals) + unit : "—";
 const panes = [...document.querySelectorAll("[data-view]")];
+let wifiState = null;
+mountWifi(document.getElementById("wifi-panel"), state => { wifiState = state; render(); });
 const simulate = byId("simulate");
 simulate.hidden = !new URLSearchParams(location.search).has("mock");
 
@@ -37,6 +42,9 @@ let pressureHistory = [];
 let replay = null;
 let sequence = 0;
 let renderedView = null;
+let acousticState = null;
+let focusedResult = null;
+mountAcoustics(byId("acoustics-panel"), state => { acousticState = state; render(); });
 const mockSession = `web-mock-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 function cap(list, size) {
@@ -98,6 +106,9 @@ function renderEvents() {
 
 function render() {
   const active = demo.current_view;
+  byId("building-view").hidden = active === "gesture";
+  byId("description").hidden = active === "gesture";
+  byId("measurements").hidden = ["gesture", "room", "results"].includes(active);
   const [label, title, description] = slides[active] ?? [active, active, ""];
   const viewNumber = views.indexOf(active) + 1;
   text("title", viewNumber > 0 ? `${viewNumber}. ${title}` : title);
@@ -117,14 +128,15 @@ function render() {
   const echo = latest["acoustic.measurement"];
   const room = latest["room.estimate"];
   const wifi = latest["wifi.features"];
-  const floorId = floor?.payload.floor_id ?? null;
+  const localEcho = acousticState && ["room", "model", "results"].includes(active);
+  const floorId = localEcho ? acousticState.floor_id : floor?.payload.floor_id ?? null;
   const floorName = floorId === null ? "—" : floorLabels[floorId] ?? `Floor ${floorId}`;
-  const candidates = room?.payload.candidates ?? [];
+  const candidates = localEcho ? acousticState.result?.candidates ?? [] : room?.payload.candidates ?? [];
   const top = candidates[0];
   const topName = top?.label ?? top?.room_id ?? "—";
-  const sameFloor = floorId !== null && room?.payload.floor_id === floorId;
+  const sameFloor = localEcho || (floorId !== null && room?.payload.floor_id === floorId);
   const slideEvent = { floor, room, model: floor, gesture: wifi, results: room ?? floor }[active];
-  byId("slide-mode").hidden = active === "intro";
+  byId("slide-mode").hidden = ["intro", "gesture", "room", "results"].includes(active);
   badge("slide-mode", slideEvent);
 
   text("floor-value", floorName);
@@ -132,27 +144,14 @@ function render() {
   text("pressure-mode", signalLabel(pressure));
   text("floor-status", floor ? `Floor estimate · ${floor.payload.status}` : "Waiting for a floor estimate.");
   trace("pressure-trace", pressureHistory.map(value => value / 100), .03);
-  text("rt60", format(echo?.payload.rt60_s, 2, " s"));
-  text("echo-mode", signalLabel(echo));
-  const reflections = echo?.payload.reflection_distances_m ?? [];
-  text("echo-details", reflections.length ? `Early reflections · ${reflections.map(value => format(value, 1, " m")).join(" / ")}` : "Waiting for a sweep.");
-  trace("echo-trace", echo?.payload.impulse_response_preview ?? []);
-  text("room-status", room?.payload.status.replaceAll("_", " ") ?? "");
-  showList("candidates", candidates, "No room candidates yet.", (item, candidate, index) => {
-    const number = document.createElement("span");
-    const name = document.createElement("strong");
-    const score = document.createElement("span");
-    number.textContent = ordinal(index + 1);
-    name.textContent = candidate.label ?? candidate.room_id;
-    score.textContent = format(candidate.score, 2);
-    item.append(number, name, score);
-  });
-  text("model-floor", floorName);
+  text("model-floor", localEcho && floorId === null ? "All floors · manual search" : floorName);
   text("model-room", sameFloor ? topName : "—");
-  badge("model-mode", floor);
+  if (localEcho) text("model-mode", "Live audio · manual floor filter");
+  else badge("model-mode", floor);
   building?.setFloor(floorId);
-  building?.setRoomCandidates(sameFloor ? candidates : [], room?.mode);
-  if (floor) building?.setMode(floor.mode);
+  building?.setRoomCandidates(sameFloor && floorId !== null && (!localEcho || acousticState.result?.status !== "no_match") ? candidates : [], localEcho ? "live" : room?.mode);
+  if (localEcho) building?.setMode("live");
+  else if (floor) building?.setMode(floor.mode);
 
   text("motion-score", format(wifi?.payload.motion_score, 2));
   text("packet-rate", format(wifi?.payload.packet_rate_hz, 0, " Hz"));
@@ -162,9 +161,23 @@ function render() {
     const result = entry.acted ? "advanced" : `ignored · ${entry.ignored_reason}`;
     item.textContent = `${entry.gesture} · ${entry.mode} · score ${format(entry.score, 2)} · ${result}`;
   });
-  text("result-floor", `${floorName} (${signalLabel(floor)})`);
-  text("result-room", `${sameFloor ? topName : "—"} (${signalLabel(room)})`);
-  text("result-trigger", demo.last_trigger ?? "—");
+  const summary = sessionResult(acousticState, wifiState);
+  text("result-room", summary.title);
+  text("result-status", summary.status);
+  text("result-floor", summary.floor == null ? "The Nucleus" : `Floor ${summary.floor === "0" ? "G" : summary.floor} · The Nucleus`);
+  text("result-score", summary.score);
+  text("result-rt60", summary.rt60);
+  text("result-snr", summary.snr);
+  text("result-scope", summary.scope);
+  // Pressure evidence remains independent of the manually selected acoustic floor.
+  text("result-pressure", floor?.mode === "live" ? `${floor.payload.floor_id == null ? "No floor estimate" : floorLabels[floor.payload.floor_id] ?? `Floor ${floor.payload.floor_id}`} · ${signalLabel(floor)}` : "Awaiting live pressure measurement");
+  text("result-motion", summary.motion);
+  text("result-note", summary.note);
+  text("result-acoustic", summary.count ? `${summary.count} accepted position${summary.count === 1 ? "" : "s"} · ${summary.status}` : "Awaiting measurement");
+  const focusKey = active === "results" && summary.top && summary.floor != null ? `${summary.floor}/${summary.top.room_id}` : null;
+  if (active === "results" && focusKey !== focusedResult) building?.focusRoom(focusKey ?? "");
+  focusedResult = focusKey;
+  if (active === "results") text("model-mode", summary.top ? "Acoustic result" : "Awaiting acoustic result");
 
   const progress = byId("replay");
   progress.hidden = !replay;
@@ -178,6 +191,7 @@ function renderControls() {
     button.disabled = !enabled;
     button.setAttribute("aria-current", button.dataset.target === demo.current_view ? "step" : "false");
   }
+  for (const button of document.querySelectorAll("[data-retest]")) button.disabled = !enabled;
   for (const id of ["previous", "next", "arm", "simulate"]) byId(id).disabled = !enabled;
   text("arm", demo.gesture_armed ? "Disarm gesture" : "Arm gesture");
   byId("arm").setAttribute("aria-pressed", String(demo.gesture_armed));
@@ -204,6 +218,7 @@ function receive(message) {
     floorLabels = Object.fromEntries(floors.map(floor => [floor.id, floor.label]));
     building?.dispose();
     building = mountBuilding(byId("building"), { floors });
+    focusedResult = null;
     text("building-label", demo.selected_building ?? state.config.building.label);
     text("session", state.session_id);
     byId("steps").replaceChildren(...views.map((id, index) => {
@@ -296,6 +311,7 @@ function previous() {
 }
 
 byId("previous").addEventListener("click", previous);
+for (const button of document.querySelectorAll("[data-retest]")) button.addEventListener("click", () => control("/demo/view", { view: button.dataset.retest }));
 byId("next").addEventListener("click", () => control("/demo/next"));
 byId("arm").addEventListener("click", () => control("/demo/armed", { armed: !demo.gesture_armed }));
 simulate.addEventListener("click", () => control("/events", {

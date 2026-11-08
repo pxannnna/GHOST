@@ -62,11 +62,10 @@ def play_and_record(signal: np.ndarray, fs: int, input_device: Optional[str], ou
         rec = sd.playrec(out2, samplerate=fs, channels=1, device=(i_dev, o_dev), dtype="float32")
         sd.wait()
         how = "duplex"
-    except Exception:  # some USB/wireless receivers refuse a shared duplex stream
-        rec = sd.rec(len(out2), samplerate=fs, channels=1, device=i_dev, dtype="float32")
-        sd.play(out2, samplerate=fs, device=o_dev)
-        sd.wait()
-        how = "separate-streams"
+    except Exception as exc:
+        # sd.play() stops a preceding sd.rec(); that fallback can analyse silence.
+        sd.stop()
+        raise RuntimeError('Simultaneous playback/recording failed. Close other audio apps and check the selected devices.') from exc
     y = rec[:, 0].astype(np.float64)
     peak = float(np.max(np.abs(y)))
     info = {"stream": how, "peak": round(peak, 4), "clipped": peak >= 0.99,

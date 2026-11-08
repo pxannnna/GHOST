@@ -14,7 +14,7 @@ export function mountBuilding(container) {
       <label>Floor <select aria-label="Model floor"><option value="all">All floors</option><option value="follow">Follow estimate</option></select></label>
       <label>View <select aria-label="Model view"><option value="3d">3D perspective</option><option value="plan">Floor plan</option></select></label>
       <label>Show <select aria-label="Building display"><option value="exterior">Complete building</option><option value="cutaway">Interior cutaway</option><option value="room">Room focus</option></select></label>
-      <button type="button" class="model-example">Show Yew</button>
+      <button type="button" class="model-example">Show study room · 3</button>
       <button type="button" class="model-reset">Reset view</button>
     </div>
     <div class="model-viewport"></div>
@@ -53,7 +53,7 @@ export function mountBuilding(container) {
   } catch {
     viewport.textContent = "3D graphics are unavailable in this browser. Open the linked source floor plans to view the building.";
     root.querySelectorAll("select, input, button").forEach(control => { control.disabled = true; });
-    return { setFloor() {}, setRoomCandidates() {}, setMode() {}, dispose() { root.remove(); } };
+    return { setFloor() {}, setRoomCandidates() {}, setMode() {}, focusRoom() {}, dispose() { root.remove(); } };
   }
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setClearColor(0xfafbfd);
@@ -323,7 +323,7 @@ export function mountBuilding(container) {
   });
   root.querySelector(".model-example").addEventListener("click", () => {
     viewSelect.value = "3d";
-    selectRoom("2/nuc-2-yew");
+    selectRoom("3/nuc-3-studyroom");
   });
   spacing.addEventListener("input", () => { update(); frameView(); });
   root.querySelector(".model-reset").addEventListener("click", frameView);
@@ -376,6 +376,12 @@ export function mountBuilding(container) {
   update();
   frameView();
   return {
+    focusRoom(key) {
+      if (key && !model.roomParts.has(key)) return;
+      if (inspected === key) return;
+      viewSelect.value = "3d";
+      selectRoom(key);
+    },
     setFloor(floorId) {
       const normalized = floorId === "G" ? "0" : floorId;
       if (estimate === normalized) return;

@@ -10,3 +10,4 @@ pyserial>=3.5
 pymavlink>=2.4
 matplotlib>=3.8
 pytest>=8
+esptool==4.13.0
