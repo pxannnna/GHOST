@@ -107,6 +107,15 @@ def combine(positions: Sequence[PositionMeasurement], cfg: Dict[str, Any] = DEFA
             if len(hits) >= need and len(hits) > best[0]:
                 best = (len(hits), float(np.median(hits)))
         ceiling = best[1]
+        # Sound that bounces ceiling -> floor (or floor -> ceiling) arrives at one-way distance
+        # H = ceiling echo + mic height, so it can look like a ceiling echo of a taller room.
+        # If an echo also repeats one mic-height closer, that closer one is the real ceiling.
+        if ceiling is not None and ceiling - mic_h >= 1.4:
+            partner = [min((d for d in p.reflection_distances_m if abs(d - (ceiling - mic_h)) <= tol),
+                           key=lambda d: abs(d - (ceiling - mic_h)), default=None) for p in positions]
+            partner = [d for d in partner if d is not None]
+            if len(partner) >= need:      # as well supported as any ceiling candidate, not a chance echo
+                ceiling = float(np.median(partner))
     height = None if ceiling is None else ceiling + mic_h
 
     walls, laterals = [], []

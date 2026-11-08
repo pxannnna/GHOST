@@ -74,11 +74,13 @@ def sweep_from_cfg(cfg: Dict[str, Any]) -> Sweep:
 
 
 def _simulated_recordings(room_id: str, sweep: Sweep, cfg: Dict[str, Any], repeats: int,
-                          mic_height: float, seed: Optional[int]) -> List[np.ndarray]:
-    """Shoebox approximation of a room from rooms.json (bbox x ceiling)."""
+                          mic_height: float, seed: Optional[int]):
+    """Shoebox approximation of a room from rooms.json (bbox x ceiling).
+    Returns (recordings, truth): `truth` is the geometry the simulation used, saved with the
+    recording so plots can show where the surfaces really are."""
     from services.acoustics.match import DEFAULT_MATCHING, absorption_for
     from services.acoustics.rooms import load_rooms
-    from services.acoustics.simulate import hybrid_ir, simulate_recording
+    from services.acoustics.simulate import field_ir, simulate_recording
     room = next(r for r in load_rooms(ROOT / cfg["rooms_file"]) if r.room_id == room_id)
     L, W = room.bbox_dims()
     H = room.ceiling_height_m
@@ -86,10 +88,16 @@ def _simulated_recordings(room_id: str, sweep: Sweep, cfg: Dict[str, Any], repea
     src = (rng.uniform(1.2, L - 1.2), rng.uniform(1.2, W - 1.2), mic_height)
     mic = (src[0] + cfg["speaker_mic_m"], src[1], src[2])
     a = absorption_for(room, {**DEFAULT_MATCHING, **cfg.get("matching", {})})
-    ir = hybrid_ir((L, W, H), src, mic, a, sweep.fs, length_s=cfg["ir_length_s"], seed=seed)
-    return [simulate_recording(ir, sweep, latency_s=0.02 + 0.007 * k, noise_rms=2e-3,
+    ir = field_ir((L, W, H), src, mic, a, sweep.fs, length_s=cfg["ir_length_s"], seed=seed)
+    recs = [simulate_recording(ir, sweep, latency_s=0.02 + 0.007 * k, noise_rms=2e-3,
                                tail_s=cfg["sweep"]["silence_after_s"], seed=None if seed is None else seed + k)
             for k in range(repeats)]
+    truth = {"simulated": True, "room_id": room_id, "room_dims_m": [round(L, 2), round(W, 2), round(H, 2)],
+             "source_xyz_m": [round(float(v), 2) for v in src],
+             "surfaces_one_way_m": {"wall": [round(float(src[0]), 2), round(float(L - src[0]), 2),
+                                             round(float(src[1]), 2), round(float(W - src[1]), 2)],
+                                    "floor": round(float(src[2]), 2), "ceiling": round(float(H - src[2]), 2)}}
+    return recs, truth
 
 
 def measure_position(position: str, room_tag: Optional[str] = None, repeats: Optional[int] = None,
@@ -106,7 +114,8 @@ def measure_position(position: str, room_tag: Optional[str] = None, repeats: Opt
     recs: List[np.ndarray] = []
     info: Dict[str, Any] = {}
     if simulate:
-        recs = _simulated_recordings(simulate, sweep, cfg, repeats, mic_height, seed)
+        recs, truth = _simulated_recordings(simulate, sweep, cfg, repeats, mic_height, seed)
+        info = {"sim_truth": truth}
         mode = "simulated"
     else:
         from services.acoustics.audio_io import play_and_record

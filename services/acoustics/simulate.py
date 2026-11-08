@@ -81,6 +81,52 @@ def hybrid_ir(dims: Sequence[float], src: Sequence[float], mic: Sequence[float],
     return h
 
 
+def field_ir(dims: Sequence[float], src: Sequence[float], mic: Sequence[float], absorption: float,
+             fs: int = 48000, length_s: float = 2.5, c: float = 343.0, early_s: float = 0.06,
+             reflection_gain_db: float = -14.0, diffuse_rel_db: float = -49.4, diffuse_slope: float = 0.60,
+             diffuse_start_s: float = 0.003,
+             clutter: bool = True, seed: Optional[int] = None) -> np.ndarray:
+    """Closer to what a laptop records in a real room than `hybrid_ir`. SIMULATION ONLY.
+
+    Three things are added to the clean shoebox model, each set from the real study-room
+    recordings (7 Nov 2026, 4 positions), not tuned to make detection succeed:
+      * specular echoes are `reflection_gain_db` quieter than the image-source model says (a laptop
+        is a poor, shielded source): the real ceiling echo sat at about -43 dB against the direct sound,
+        roughly 11 dB above the noise floor;
+      * a diffuse background (furniture, seats, scattering) starts `diffuse_start_s` after the
+        direct sound and falls as t^-`diffuse_slope` (about -3.6 dB per doubling of distance) times
+        the room's Eyring decay. The real median echo level was -49, -55, -59 and -63 dB at roughly
+        1, 2, 4 and 8 m; `diffuse_rel_db` is the noise std relative to the direct amplitude;
+      * a few echoes from the laptop's own body, screen and table at 0.35-0.55 m, -24 to -30 dB
+        (the real traces show two such dots at 0.36 and 0.47 m).
+    """
+    rng = np.random.default_rng(seed)
+    dims = np.asarray(dims, float)
+    n = int(length_s * fs)
+    early = shoebox_ir(dims, src, mic, absorption, fs, length_s=early_s + 0.01, c=c)
+    dist = max(float(np.linalg.norm(np.subtract(src, mic))), 0.05)
+    d0 = int(round(dist / c * fs))
+    a_direct = float(early[d0])
+    ne = int(early_s * fs)
+    h = np.zeros(n)
+    h[:ne] = early[:ne] * 10 ** (reflection_gain_db / 20)
+    h[d0] = a_direct                                   # the direct sound is untouched
+    V = float(np.prod(dims))
+    S = 2 * (dims[0] * dims[1] + dims[0] * dims[2] + dims[1] * dims[2])
+    rt = -0.161 * V / (S * np.log(1 - absorption))
+    t = np.arange(n) / fs
+    i0 = int(diffuse_start_s * fs)
+    env = np.zeros(n)
+    env[i0:] = (t[i0] / t[i0:]) ** diffuse_slope * 10 ** (-3 * (t[i0:] - t[i0]) / rt)
+    fade = np.clip((np.arange(n) - i0) / (0.001 * fs), 0, 1)
+    h += rng.normal(0, 1, n) * abs(a_direct) * 10 ** (diffuse_rel_db / 20) * env * fade
+    if clutter:
+        for one_way_m, rel_db in ((0.36, -24.0), (0.47, -27.0), (0.55, -30.0)):
+            idx = d0 + int(round((2 * one_way_m - dist) / c * fs))
+            h[idx] += abs(a_direct) * 10 ** (rel_db / 20) * rng.choice([-1.0, 1.0])
+    return h
+
+
 def simulate_recording(ir: np.ndarray, sweep: Sweep, latency_s: float = 0.03, noise_rms: float = 1e-4,
                        tail_s: float = 2.0, seed: Optional[int] = None) -> np.ndarray:
     """What the mic would capture: latency + sweep*IR + background noise."""

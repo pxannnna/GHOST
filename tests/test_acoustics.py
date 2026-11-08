@@ -185,3 +185,37 @@ def test_scale_from_taped_room_reproduces_its_size():
     L, W = sorted([max(xs) - min(xs), max(ys) - min(ys)], reverse=True)
     assert L == pytest.approx(14.5, rel=0.02) and W == pytest.approx(11.5, rel=0.02)
     assert out["scale_source"].startswith("measured")
+
+
+# ------------------------------------------------------------------ realistic simulator + double bounce
+def test_field_ir_keeps_direct_sound_and_laptop_clutter(sweep):
+    from services.acoustics.simulate import field_ir
+    h = field_ir((8, 6, 3.0), (3.0, 2.5, 0.6), (3.15, 2.5, 0.6), 0.2, FS, 2.5, seed=1)
+    assert int(np.argmax(np.abs(h))) == int(round(0.15 / 343 * FS))      # direct sound untouched
+    rec = simulate_recording(h, sweep, latency_s=0.02, noise_rms=2e-3, tail_s=3.0, seed=1)
+    f = F.extract(ir_from_recordings([rec], sweep), FS, speaker_mic_m=0.15, max_distance_m=25)
+    assert any(abs(r.distance_m - 0.36) <= 0.05 for r in f.reflections)  # laptop body / table echo
+
+
+def test_field_ir_noise_floor_matches_the_real_study_room():
+    """Real study room: median echo level vs direct at ~2 m was -55 dB; the simulation must stay near it."""
+    from services.acoustics.plot import echo_curve
+    from services.acoustics.simulate import field_ir
+    h = field_ir((13.1, 11.2, 3.5), (5.0, 5.0, 0.6), (5.15, 5.0, 0.6), 0.22, FS, 2.5, seed=3)
+    dist, db = echo_curve({"ir": h, "fs": FS}, {"speed_of_sound_mps": 343.0, "speaker_mic_m": 0.15}, 9.0)
+    for lo, hi, real in ((0.8, 1.2, -48.6), (1.8, 2.2, -54.9), (3.6, 4.4, -58.6)):
+        m = (dist >= lo) & (dist <= hi)
+        assert abs(np.median(db[m]) - real) < 6.0, (lo, np.median(db[m]), real)
+
+
+def test_double_bounce_is_not_mistaken_for_the_ceiling():
+    """Floor-ceiling double bounce arrives at one-way distance H (2.45); the ceiling echo at H - mic height (1.85)."""
+    pos = [PositionMeasurement(str(i), 0.4, ([0.4, 1.85] if i < 3 else [0.4]) + [2.45, 3.1 + 0.3 * i], 0.6)
+           for i in range(4)]                       # ceiling echo at 3 of 4, double bounce at 4 of 4
+    assert combine(pos).height_m == pytest.approx(2.45, abs=0.05)
+
+
+def test_chance_echo_does_not_override_the_ceiling():
+    pos = [PositionMeasurement(str(i), 0.4, [0.4, 2.9] + ([2.3] if i < 2 else []) + [4.0 + 0.4 * i], 0.6)
+           for i in range(4)]                       # 2.3 m only at 2 of 4 positions: not enough support
+    assert combine(pos).height_m == pytest.approx(3.5, abs=0.05)
